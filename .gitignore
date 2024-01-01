@@ -1,0 +1,7 @@
+*.o
+nuts/
+*.dSYM/
+*.su
+*.d
+.DS_Store
+*.old
