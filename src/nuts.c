@@ -1,16 +1,9 @@
 #define TB_IMPL
-#include "termbox2.h"
-#include "files.h"
+#include "nuts.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
 #include <stdint.h>
-
-#define FG TB_WHITE
-#define BG TB_BLACK
-#define size_header 2
-#define size_footer 2
-#define left_margin 2
 
 void print_word(int x, int y, const char text[static 1]) {
     int i = 0;
@@ -131,6 +124,9 @@ void render(void) {
     tb_present();
 }
 
+void handle_key(struct tb_event ev) {
+}
+
 int main(void) {
     int ret = tb_init();
 
@@ -152,10 +148,10 @@ int main(void) {
                 case (TB_EVENT_KEY):
                     if (ev.key == TB_KEY_CTRL_Q)
                         goto RIP;
-                    printf("key");
+                    handle_key(ev);
                     break;
                 case (TB_EVENT_MOUSE):
-                    printf("mouse");
+                    // todo handle mouse events
                     break;
                 case (TB_EVENT_RESIZE):
                     render();
