@@ -9,6 +9,7 @@
 #define size_header 2
 #define size_footer 2
 #define left_margin 2
+#define right_margin 2
 
 typedef struct editor_s editor_t;
 
@@ -19,5 +20,7 @@ struct editor_s {
     int cx;
     int cy;
 };
+
+editor_t ed_init(void);
 
 #endif

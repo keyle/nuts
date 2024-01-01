@@ -5,6 +5,8 @@
 #include <strings.h>
 #include <stdint.h>
 
+static editor_t ed = {0};
+
 void print_word(int x, int y, const char text[static 1]) {
     int i = 0;
     while (text[i] != '\0') {
@@ -66,8 +68,6 @@ void draw_frame(void) {
     draw_word("EBUG", 49, 0, TB_BLACK | TB_BOLD, TB_WHITE);
 }
 
-static editor_t ed = {0};
-
 const char* get_buffer_contents(void) {
     if (ed.file_contents) {
         return ed.file_contents;
@@ -82,13 +82,17 @@ const char* get_buffer_contents(void) {
     }
 }
 
+int max_width(void) {
+    return tb_width() - right_margin;
+}
+
 int max_height(void) {
-    return tb_height() - size_header - size_footer - 4;
+    return tb_height() - size_footer;
 }
 
 void draw_text_buffer(void) {
     const char* file = get_buffer_contents();
-    int draw_line_count = max_height();
+    int draw_line_count = max_height() - size_header;
 
     size_t i = 0;
     char ch;
@@ -119,18 +123,26 @@ void render(void) {
 
 void handle_key(struct tb_event ev) {
     int mh = max_height();
+    int mw = max_width();
     switch (ev.key) {
         case TB_KEY_ARROW_UP:
-            ed.cy = ed.cy > 0 ? ed.cy - 1 : 0;
+            ed.cy = ed.cy > size_header ? ed.cy - 1 : size_header;
             break;
         case TB_KEY_ARROW_DOWN:
-            ed.cy = ed.cy > mh ? mh : ed.cy + 1;
+            ed.cy = ed.cy >= mh ? mh : ed.cy + 1;
+            break;
+        case TB_KEY_ARROW_LEFT:
+            ed.cx = ed.cx > left_margin ? ed.cx - 1 : left_margin;
+            break;
+        case TB_KEY_ARROW_RIGHT:
+            ed.cx = ed.cx >= mw ? mw : ed.cx + 1;
             break;
     }
 }
 
 int main(void) {
     int ret = tb_init();
+    ed = ed_init();
 
     if (ret) {
         fprintf(stderr, "Could not even TUI. RIP.");
