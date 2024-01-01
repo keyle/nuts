@@ -76,9 +76,11 @@ const char* get_buffer_contents(void) {
     if (ed.file_contents) {
         return ed.file_contents;
     } else {
-        file_t res = read_file_content("/Users/n/Code/site-gen-c/src/settings.c");
+        const char* file = "/Users/n/Code/site-gen-c/src/settings.c";
+        file_t res = read_file_content(file);
         if (res.error) {
-            fprintf(stderr, "could not load file...\n");
+            tb_shutdown();
+            fprintf(stderr, "Could not load file... %s\n", file);
             exit(1);
         }
         ed.file_contents = res.data;
@@ -178,7 +180,7 @@ int main(void) {
     ed = ed_init();
 
     if (ret) {
-        fprintf(stderr, "Could not even TUI. RIP.");
+        fprintf(stderr, "Could not even TUI.");
         exit(1);
     }
 
