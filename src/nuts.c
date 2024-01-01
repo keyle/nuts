@@ -97,7 +97,7 @@ void draw_text_buffer(void) {
     int draw_line_count = tb_height() - size_header - size_footer - 4;
     // decide the offset from the top
     size_t scroll_v_offset = offset_top;
-    size_t scroll_h_offset = 2;
+    size_t scroll_h_offset = 0;
 
     size_t i = 0;
     char ch;
@@ -166,13 +166,12 @@ int main(void) {
         } else if (res == TB_ERR_POLL && tb_last_errno() == EINTR) {
             continue;
         } else if (res != TB_ERR_NO_EVENT) {
-            fprintf(stderr, "Renderer error: %s", tb_strerror(res));
+            fprintf(stderr, "(aborting) renderer error: %s\n", tb_strerror(res));
             return 1;
         }
     }
 
 RIP:
     tb_shutdown();
-    fprintf(stderr, "shutdown %d", tb_last_errno());
     return 0;
 }
