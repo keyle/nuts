@@ -66,6 +66,11 @@ void draw_frame(void) {
 
     draw_word("D", 48, 0, TB_RED | TB_BOLD, TB_WHITE);
     draw_word("EBUG", 49, 0, TB_BLACK | TB_BOLD, TB_WHITE);
+
+    /********/
+
+    tb_printf(width - 10, height - 1, TB_RED | TB_BOLD, TB_WHITE, "F12");
+    tb_printf(width - 6, height - 1, TB_BLACK | TB_BOLD, TB_WHITE, "QUIT");
 }
 
 const char* get_buffer_contents(void) {
@@ -160,7 +165,7 @@ int main(void) {
         if (res == TB_OK) {
             switch (ev.type) {
                 case (TB_EVENT_KEY):
-                    if (ev.key == TB_KEY_CTRL_Q)
+                    if (ev.key == TB_KEY_CTRL_Q || ev.key == TB_KEY_F12)
                         goto RIP;
                     handle_key(ev);
                     break;
