@@ -16,3 +16,5 @@ AGPL 3.0 licensed.
 make
 ./nuts
 ```
+
+Note: only currently tested on macOS / apple silicon.
