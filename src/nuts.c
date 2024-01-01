@@ -68,8 +68,7 @@ void draw_frame(void) {
 
 static editor_t ed = {0};
 
-const char*
-get_file(void) {
+const char* get_buffer_contents(void) {
     if (ed.file_contents) {
         return ed.file_contents;
     } else {
@@ -83,12 +82,13 @@ get_file(void) {
     }
 }
 
+int max_height(void) {
+    return tb_height() - size_header - size_footer - 4;
+}
+
 void draw_text_buffer(void) {
-    // if not file, load file
-    const char* file = get_file();
-    // decide how many lines we are going to draw
-    int draw_line_count = tb_height() - size_header - size_footer - 4;
-    // decide the offset from the top
+    const char* file = get_buffer_contents();
+    int draw_line_count = max_height();
 
     size_t i = 0;
     char ch;
@@ -105,11 +105,6 @@ void draw_text_buffer(void) {
         }
         tb_set_cell((x++) + left_margin + ed.scroll_h_offset, y + size_header + ed.scroll_v_offset, ch, FG, BG);
     } while (file[++i] != '\0');
-
-    // char* lines[draw_line_count] = file_split_lines(file, offset);
-
-    // for each line
-    // 		draw every cell?
 }
 
 void render(void) {
@@ -118,11 +113,20 @@ void render(void) {
     draw_background();
     draw_frame();
     draw_text_buffer();
-    tb_set_cursor(10, 10);
+    tb_set_cursor(ed.cx, ed.cy);
     tb_present();
 }
 
 void handle_key(struct tb_event ev) {
+    int mh = max_height();
+    switch (ev.key) {
+        case TB_KEY_ARROW_UP:
+            ed.cy = ed.cy > 0 ? ed.cy - 1 : 0;
+            break;
+        case TB_KEY_ARROW_DOWN:
+            ed.cy = ed.cy > mh ? mh : ed.cy + 1;
+            break;
+    }
 }
 
 int main(void) {
@@ -152,10 +156,9 @@ int main(void) {
                     // todo handle mouse events
                     break;
                 case (TB_EVENT_RESIZE):
-                    render();
                     break;
             }
-            tb_present();
+            render();
 
         } else if (res == TB_ERR_POLL && tb_last_errno() == EINTR) {
             continue;
