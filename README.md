@@ -1,6 +1,6 @@
 ### nuts
 
-Terminal code editor inspired by the DOS Borland/Turbo IDE of the 90s.
+Terminal IDE inspired by the DOS Borland C++/Turbo IDE of the 90s.
 
 Built on termbox2
 
