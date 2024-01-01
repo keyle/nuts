@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <stdint.h>
-
 static editor_t ed = {0};
 
 void print_word(int x, int y, const char text[static 1]) {
@@ -102,8 +101,22 @@ void draw_text_buffer(void) {
     size_t i = 0;
     char ch;
     int x = 0, y = 0;
+    uint16_t color;
+
+    bool in_dbl_quotes = false;
+    bool in_sgl_quotes = false;
+
+#define ASCII_SINGLE_QUOTE 39
+#define ASCII_DOUBLE_QUOTE 34
+#define ASCII_LOWER_A 97
+#define ASCII_LOWER_Z 122
+#define ASCII_UPPER_A 65
+#define ASCII_UPPER_Z 90
+#define ASCII_0 48
+#define ASCII_9 57
 
     do {
+        color = TB_CYAN | TB_BOLD;
         ch = file[i];
         if (ch == '\n') {
             x = 0;
@@ -112,7 +125,22 @@ void draw_text_buffer(void) {
                 break;
             continue;
         }
-        tb_set_cell((x++) + left_margin + ed.scroll_h_offset, y + size_header + ed.scroll_v_offset, ch, FG, BG);
+
+        // flipping bits
+        if (ch == ASCII_SINGLE_QUOTE)
+            in_sgl_quotes = !in_sgl_quotes;
+        else if (ch == ASCII_DOUBLE_QUOTE)
+            in_dbl_quotes = !in_dbl_quotes;
+
+        // colouring
+        if (in_dbl_quotes || in_sgl_quotes || ch == ASCII_SINGLE_QUOTE || ch == ASCII_DOUBLE_QUOTE)
+            color = TB_GREEN | TB_BOLD; // strings
+        else if ((ch >= ASCII_UPPER_A && ch <= ASCII_UPPER_Z) || (ch >= ASCII_LOWER_A && ch <= ASCII_LOWER_Z))
+            color = FG; // a-Z
+        else if (ch >= ASCII_0 && ch <= ASCII_9)
+            color = TB_GREEN | TB_BOLD; // numbers
+
+        tb_set_cell((x++) + left_margin + ed.scroll_h_offset, y + size_header + ed.scroll_v_offset, ch, color, BG);
     } while (file[++i] != '\0');
 }
 

@@ -4,6 +4,8 @@
 #include "termbox2.h"
 #include "files.h"
 
+#include <stdbool.h>
+
 #define FG TB_WHITE
 #define BG TB_BLUE
 #define size_header 2
