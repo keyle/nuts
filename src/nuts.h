@@ -13,8 +13,11 @@
 typedef struct editor_s editor_t;
 
 struct editor_s {
-		
+    char* file_contents;
+    size_t scroll_v_offset;
+    size_t scroll_h_offset;
+    int cx;
+    int cy;
 };
-
 
 #endif

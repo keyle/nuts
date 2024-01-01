@@ -66,20 +66,20 @@ void draw_frame(void) {
     draw_word("EBUG", 49, 0, TB_BLACK | TB_BOLD, TB_WHITE);
 }
 
-static size_t offset_top = 0;
-static char* file_contents = NULL;
+static editor_t ed = {0};
 
-const char* get_file(void) {
-    if (file_contents) {
-        return file_contents;
+const char*
+get_file(void) {
+    if (ed.file_contents) {
+        return ed.file_contents;
     } else {
         file_t res = read_file_content("/Users/n/Code/site-gen-c/src/settings.c");
         if (res.error) {
             fprintf(stderr, "could not load file...\n");
             exit(1);
         }
-        file_contents = res.data;
-        return file_contents;
+        ed.file_contents = res.data;
+        return ed.file_contents;
     }
 }
 
@@ -89,8 +89,6 @@ void draw_text_buffer(void) {
     // decide how many lines we are going to draw
     int draw_line_count = tb_height() - size_header - size_footer - 4;
     // decide the offset from the top
-    size_t scroll_v_offset = offset_top;
-    size_t scroll_h_offset = 0;
 
     size_t i = 0;
     char ch;
@@ -105,7 +103,7 @@ void draw_text_buffer(void) {
                 break;
             continue;
         }
-        tb_set_cell((x++) + left_margin + scroll_h_offset, y + size_header + scroll_v_offset, ch, FG, BG);
+        tb_set_cell((x++) + left_margin + ed.scroll_h_offset, y + size_header + ed.scroll_v_offset, ch, FG, BG);
     } while (file[++i] != '\0');
 
     // char* lines[draw_line_count] = file_split_lines(file, offset);
