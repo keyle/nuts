@@ -5,7 +5,7 @@
 #include "files.h"
 
 #define FG TB_WHITE
-#define BG TB_BLACK
+#define BG TB_BLUE
 #define size_header 2
 #define size_footer 2
 #define left_margin 2
