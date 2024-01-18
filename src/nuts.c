@@ -70,6 +70,10 @@ void draw_frame(void) {
 
     tb_printf(width - 10, height - 1, TB_RED | TB_BOLD, TB_WHITE, "F12");
     tb_printf(width - 6, height - 1, TB_BLACK | TB_BOLD, TB_WHITE, "QUIT");
+
+    char str[80];
+    sprintf(str, "%zd", ed.scroll_v_offset);
+    tb_printf(2, height - 1, TB_BLUE | TB_BOLD, TB_WHITE, str);
 }
 
 const char* get_buffer_contents(void) {
@@ -142,7 +146,7 @@ void draw_text_buffer(void) {
         else if (ch >= ASCII_0 && ch <= ASCII_9)
             color = TB_GREEN | TB_BOLD; // numbers
 
-        tb_set_cell((x++) + left_margin + ed.scroll_h_offset, y + size_header + ed.scroll_v_offset, ch, color, BG);
+        tb_set_cell((x++) + left_margin - ed.scroll_h_offset, y + size_header - ed.scroll_v_offset, ch, color, BG);
     } while (file[++i] != '\0');
 }
 
@@ -150,8 +154,8 @@ void render(void) {
     print_word(10, 10, "Hello, world!");
     print_word(10, 11, "Press CTRL Q to terminate.");
     draw_background();
-    draw_frame();
     draw_text_buffer();
+    draw_frame();
     tb_set_cursor(ed.cx, ed.cy);
     tb_present();
 }
@@ -161,10 +165,20 @@ void handle_key(struct tb_event ev) {
     int mw = max_width();
     switch (ev.key) {
         case TB_KEY_ARROW_UP:
-            ed.cy = ed.cy > size_header ? ed.cy - 1 : size_header;
+            if (ed.cy <= size_header) {
+                if (ed.scroll_v_offset > 0) {
+                    ed.scroll_v_offset--;
+                }
+            } else {
+                ed.cy--;
+            }
             break;
         case TB_KEY_ARROW_DOWN:
-            ed.cy = ed.cy >= mh ? mh : ed.cy + 1;
+            if (ed.cy >= mh) {
+                ed.scroll_v_offset++;
+            } else {
+                ed.cy++;
+            }
             break;
         case TB_KEY_ARROW_LEFT:
             ed.cx = ed.cx > left_margin ? ed.cx - 1 : left_margin;
@@ -180,7 +194,7 @@ int main(void) {
     ed = ed_init();
 
     if (ret) {
-        fprintf(stderr, "Could not even TUI.");
+        fprintf(stderr, "Could not even TUI, bro.");
         exit(1);
     }
 
