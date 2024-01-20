@@ -4,9 +4,8 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <stdint.h>
-#include <assert.h>
 
-static editor_t ed = {0};
+editor_t ed = {0};
 
 void print_word(int x, int y, const char text[static 1]) {
     int i = 0;
@@ -93,14 +92,6 @@ const char* get_buffer_contents(void) {
     }
 }
 
-int max_width(void) {
-    return tb_width() - right_margin;
-}
-
-int max_height(void) {
-    return tb_height() - size_footer;
-}
-
 void draw_text_buffer(void) {
     const char* file = get_buffer_contents();
     int draw_line_count = max_height() - size_header;
@@ -146,10 +137,13 @@ void draw_text_buffer(void) {
 void print_status_bar(void) {
     int height = tb_height();
     char temp[130];
-    size_t ll = get_line_len(ed);
+    size_t ll = get_line_len();
 
-    // temporary print
-    sprintf(temp, "(%i,%i) cx %i cy %i | line %zu | ll %zu", (ed.cy - size_header + 1), (ed.cx - left_margin + 1), ed.cx, ed.cy, ed.line, ll);
+    size_t line_num = get_line_num();
+    size_t line_len = get_line_num_len(line_num);
+
+    // debug temporary print
+    sprintf(temp, "(%i,%i) cx %i cy %i | line %zu | ll %zu | ln %zu | llen %zu", (ed.cy - size_header + 1), (ed.cx - left_margin + 1), ed.cx, ed.cy, ed.line, ll, line_num, line_len);
     tb_printf(2, height - 1, TB_BLACK | TB_BOLD | TB_ITALIC, FRAME_BG, temp);
 }
 
@@ -166,19 +160,12 @@ void handle_key(struct tb_event ev) {
     int mh = max_height();
     int mw = max_width();
     size_t ll;
+    size_t line_num;
+    size_t line_len;
+
     switch (ev.key) {
         case TB_KEY_ARROW_UP:
-            if (ed.cy <= size_header) {
-                if (ed.scroll_v_offset > 0) {
-                    ed.scroll_v_offset--;
-                    ed.line--;
-                    assert(ed.line >= 0 && "line should not be negative");
-                }
-            } else {
-                ed.cy--;
-                ed.line--;
-                assert(ed.line >= 0 && "line should not be negative");
-            }
+            try_move_cursor_up();
             break;
 
         case TB_KEY_ARROW_DOWN:
@@ -189,15 +176,23 @@ void handle_key(struct tb_event ev) {
                 ed.cy++;
                 ed.line++;
             }
+            ll = get_line_len();
+            ed.cx = (ed.cx >= ll - 1) ? ll - 1 : (ed.cx);
+            if (ed.col < ll)
+                ed.cx = ed.col;
             break;
 
         case TB_KEY_ARROW_LEFT:
             ed.cx = (ed.cx > left_margin) ? (ed.cx - 1) : left_margin;
+            ed.col = ed.col > left_margin ? (ed.col - 1) : left_margin;
             break;
 
         case TB_KEY_ARROW_RIGHT:
-            ll = get_line_len(ed);
-            ed.cx = (ed.cx >= ll) ? ll : (ed.cx + 1);
+            line_num = get_line_num();
+            line_len = get_line_num_len(line_num);
+            ll = get_line_len();
+            ed.cx = (ed.cx >= ll - 1) ? ll - 1 : (ed.cx + 1);
+            ed.col = (ed.col >= ll - 1) ? ll - 1 : (ed.col + 1);
             break;
     }
 }
