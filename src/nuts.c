@@ -11,7 +11,7 @@ static editor_t ed = {0};
 void print_word(int x, int y, const char text[static 1]) {
     int i = 0;
     while (text[i] != '\0') {
-        tb_set_cell(x + i, y, text[i], FG, BG);
+        tb_set_cell(x + i, y, text[i], FG, SCREEN_BG);
         i++;
     }
 }
@@ -30,7 +30,7 @@ void draw_background(void) {
 
     for (i = 0; i < width - 0; i++) {
         for (j = 0; j < height - 0; j++) {
-            tb_set_cell(i, j, 0, 0, BG);
+            tb_set_cell(i, j, 0, 0, SCREEN_BG);
         }
     }
 }
@@ -40,45 +40,41 @@ void draw_frame(void) {
     int height = tb_height();
     int i;
 
-    for (i = 0; i < width; i++) {
-        tb_set_cell(i, 0, 0, 0, TB_WHITE);
-        tb_set_cell(i, height - 1, 0, 0, TB_WHITE);
-    }
-
     for (i = 0; i < height; i++) {
-        tb_set_cell(0, i, 0, 0, TB_WHITE);
-        tb_set_cell(width - 1, i, 0, 0, TB_WHITE);
+        if (left_margin > 0) {
+            tb_set_cell(0, i, 0, 0, SCREEN_BG);
+        }
+        tb_set_cell(width - 1, i, 0, 0, SCREEN_BG);
     }
 
-    draw_word("F", 2, 0, TB_RED | TB_BOLD, TB_WHITE);
-    draw_word("ILE", 3, 0, TB_BLACK | TB_BOLD, TB_WHITE);
+    for (i = 0; i < width; i++) {
+        tb_set_cell(i, 0, 0, 0, FRAME_BG);
+        tb_set_cell(i, 1, 0, 0, SCREEN_BG);
+        tb_set_cell(i, height - 1, 0, 0, FRAME_BG);
+    }
 
-    draw_word("E", 10, 0, TB_RED | TB_BOLD, TB_WHITE);
-    draw_word("DIT", 11, 0, TB_BLACK | TB_BOLD, TB_WHITE);
+    draw_word("F", 2, 0, TB_RED | TB_BOLD, FRAME_BG);
+    draw_word("ILE", 3, 0, TB_BLACK | TB_BOLD, FRAME_BG);
 
-    draw_word("S", 19, 0, TB_RED | TB_BOLD, TB_WHITE);
-    draw_word("EARCH", 20, 0, TB_BLACK | TB_BOLD, TB_WHITE);
+    draw_word("E", 10, 0, TB_RED | TB_BOLD, FRAME_BG);
+    draw_word("DIT", 11, 0, TB_BLACK | TB_BOLD, FRAME_BG);
 
-    draw_word("R", 30, 0, TB_RED | TB_BOLD, TB_WHITE);
-    draw_word("UN", 31, 0, TB_BLACK | TB_BOLD, TB_WHITE);
+    draw_word("S", 19, 0, TB_RED | TB_BOLD, FRAME_BG);
+    draw_word("EARCH", 20, 0, TB_BLACK | TB_BOLD, FRAME_BG);
 
-    draw_word("B", 38, 0, TB_RED | TB_BOLD, TB_WHITE);
-    draw_word("UILD", 39, 0, TB_BLACK | TB_BOLD, TB_WHITE);
+    draw_word("R", 30, 0, TB_RED | TB_BOLD, FRAME_BG);
+    draw_word("UN", 31, 0, TB_BLACK | TB_BOLD, FRAME_BG);
 
-    draw_word("D", 48, 0, TB_RED | TB_BOLD, TB_WHITE);
-    draw_word("EBUG", 49, 0, TB_BLACK | TB_BOLD, TB_WHITE);
+    draw_word("B", 38, 0, TB_RED | TB_BOLD, FRAME_BG);
+    draw_word("UILD", 39, 0, TB_BLACK | TB_BOLD, FRAME_BG);
+
+    draw_word("D", 48, 0, TB_RED | TB_BOLD, FRAME_BG);
+    draw_word("EBUG", 49, 0, TB_BLACK | TB_BOLD, FRAME_BG);
 
     /********/
 
-    tb_printf(width - 10, height - 1, TB_RED | TB_BOLD, TB_WHITE, "F12");
-    tb_printf(width - 6, height - 1, TB_BLACK | TB_BOLD, TB_WHITE, "QUIT");
-
-    // temporary print
-    char temp[120];
-    size_t ll = get_line_len(ed);
-    sprintf(temp, "line %zu | ll %zu", ed.line, ll);
-
-    tb_printf(2, height - 1, TB_BLUE | TB_BOLD, TB_WHITE, temp);
+    tb_printf(width - 10, height - 1, TB_RED | TB_BOLD, FRAME_BG, "F12");
+    tb_printf(width - 6, height - 1, TB_BLACK | TB_BOLD, FRAME_BG, "QUIT");
 }
 
 const char* get_buffer_contents(void) {
@@ -117,15 +113,6 @@ void draw_text_buffer(void) {
     bool in_dbl_quotes = false;
     bool in_sgl_quotes = false;
 
-#define ASCII_SINGLE_QUOTE 39
-#define ASCII_DOUBLE_QUOTE 34
-#define ASCII_LOWER_A 97
-#define ASCII_LOWER_Z 122
-#define ASCII_UPPER_A 65
-#define ASCII_UPPER_Z 90
-#define ASCII_0 48
-#define ASCII_9 57
-
     do {
         color = TB_CYAN | TB_BOLD;
         ch = file[i];
@@ -151,17 +138,27 @@ void draw_text_buffer(void) {
         else if (ch >= ASCII_0 && ch <= ASCII_9)
             color = TB_GREEN | TB_BOLD; // numbers
 
-        tb_set_cell((x++) + left_margin - ed.scroll_h_offset, y + size_header - ed.scroll_v_offset, ch, color, BG);
+        tb_set_cell((x++) + left_margin - ed.scroll_h_offset, y + size_header - ed.scroll_v_offset, ch, color, SCREEN_BG);
+
     } while (file[++i] != '\0');
 }
 
+void print_status_bar(void) {
+    int height = tb_height();
+    char temp[130];
+    size_t ll = get_line_len(ed);
+
+    // temporary print
+    sprintf(temp, "(%i,%i) cx %i cy %i | line %zu | ll %zu", (ed.cy - size_header + 1), (ed.cx - left_margin + 1), ed.cx, ed.cy, ed.line, ll);
+    tb_printf(2, height - 1, TB_BLACK | TB_BOLD | TB_ITALIC, FRAME_BG, temp);
+}
+
 void render(void) {
-    print_word(10, 10, "Hello, world!");
-    print_word(10, 11, "Press CTRL Q to terminate.");
     draw_background();
     draw_text_buffer();
     draw_frame();
     tb_set_cursor(ed.cx, ed.cy);
+    print_status_bar();
     tb_present();
 }
 
@@ -195,12 +192,12 @@ void handle_key(struct tb_event ev) {
             break;
 
         case TB_KEY_ARROW_LEFT:
-            ed.cx = ed.cx > left_margin ? ed.cx - 1 : left_margin;
+            ed.cx = (ed.cx > left_margin) ? (ed.cx - 1) : left_margin;
             break;
 
         case TB_KEY_ARROW_RIGHT:
             ll = get_line_len(ed);
-            ed.cx = ed.cx >= (ll + 1) ? (ll + 1) : ed.cx + 1;
+            ed.cx = (ed.cx >= ll) ? ll : (ed.cx + 1);
             break;
     }
 }

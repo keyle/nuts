@@ -6,11 +6,21 @@
 
 #include <stdbool.h>
 
+#define ASCII_SINGLE_QUOTE 39
+#define ASCII_DOUBLE_QUOTE 34
+#define ASCII_LOWER_A 97
+#define ASCII_LOWER_Z 122
+#define ASCII_UPPER_A 65
+#define ASCII_UPPER_Z 90
+#define ASCII_0 48
+#define ASCII_9 57
+
 #define FG TB_WHITE
-#define BG TB_BLUE
+#define SCREEN_BG TB_DEFAULT
+#define FRAME_BG (TB_BLACK | TB_BRIGHT)
 #define size_header 2
 #define size_footer 2
-#define left_margin 2
+#define left_margin 0
 #define right_margin 2
 
 typedef struct editor_s editor_t;
