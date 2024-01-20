@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <stdint.h>
+#include <assert.h>
+
 static editor_t ed = {0};
 
 void print_word(int x, int y, const char text[static 1]) {
@@ -71,9 +73,12 @@ void draw_frame(void) {
     tb_printf(width - 10, height - 1, TB_RED | TB_BOLD, TB_WHITE, "F12");
     tb_printf(width - 6, height - 1, TB_BLACK | TB_BOLD, TB_WHITE, "QUIT");
 
-    char str[80];
-    sprintf(str, "%zd", ed.scroll_v_offset);
-    tb_printf(2, height - 1, TB_BLUE | TB_BOLD, TB_WHITE, str);
+    // temporary print
+    char temp[120];
+    size_t ll = get_line_len(ed);
+    sprintf(temp, "line %zu | ll %zu", ed.line, ll);
+
+    tb_printf(2, height - 1, TB_BLUE | TB_BOLD, TB_WHITE, temp);
 }
 
 const char* get_buffer_contents(void) {
@@ -163,28 +168,39 @@ void render(void) {
 void handle_key(struct tb_event ev) {
     int mh = max_height();
     int mw = max_width();
+    size_t ll;
     switch (ev.key) {
         case TB_KEY_ARROW_UP:
             if (ed.cy <= size_header) {
                 if (ed.scroll_v_offset > 0) {
                     ed.scroll_v_offset--;
+                    ed.line--;
+                    assert(ed.line >= 0 && "line should not be negative");
                 }
             } else {
                 ed.cy--;
+                ed.line--;
+                assert(ed.line >= 0 && "line should not be negative");
             }
             break;
+
         case TB_KEY_ARROW_DOWN:
             if (ed.cy >= mh) {
                 ed.scroll_v_offset++;
+                ed.line++;
             } else {
                 ed.cy++;
+                ed.line++;
             }
             break;
+
         case TB_KEY_ARROW_LEFT:
             ed.cx = ed.cx > left_margin ? ed.cx - 1 : left_margin;
             break;
+
         case TB_KEY_ARROW_RIGHT:
-            ed.cx = ed.cx >= mw ? mw : ed.cx + 1;
+            ll = get_line_len(ed);
+            ed.cx = ed.cx >= (ll + 1) ? (ll + 1) : ed.cx + 1;
             break;
     }
 }

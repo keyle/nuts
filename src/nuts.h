@@ -17,12 +17,14 @@ typedef struct editor_s editor_t;
 
 struct editor_s {
     char* file_contents;
-    size_t scroll_v_offset;
-    size_t scroll_h_offset;
-    int cx;
-    int cy;
+    size_t scroll_v_offset; // vertical offset into file buffer, what is skipped from rendering, in lines
+    size_t scroll_h_offset; // horizontal offset
+    size_t line;            // file buffer line
+    int cx;                 // screen coordinates
+    int cy;                 // starts at 2 due to header
 };
 
 editor_t ed_init(void);
+size_t get_line_len(editor_t ed);
 
 #endif
