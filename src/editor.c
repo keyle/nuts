@@ -76,15 +76,33 @@ void try_move_cursor_down() {
     resume_cx_desired_col();
 }
 
+// Move left, if it's the first char, and if we're not on the first line:
+// move up and place the cursor at the end of the line
 void try_move_cursor_left() {
-    ed.cx = (ed.cx > left_margin) ? (ed.cx - 1) : left_margin;
-    ed.col = ed.col > left_margin ? (ed.col - 1) : left_margin;
+    if (ed.cx <= left_margin) {
+        if (ed.line == 0)
+            return;
+        try_move_cursor_up();
+        ed.col = max_width();
+        resume_cx_desired_col();
+    } else {
+        ed.cx--;
+        ed.col = ed.cx;
+    }
 }
 
-// BUG the first line has an extra char space
+// Move right, if it's past the EOL, and we're not at the last line:
+// move down and place the cursor on the first character
+// FIXME the first line has an extra char space
 void try_move_cursor_right() {
-    size_t ll;
-    ll = get_line_len();
-    ed.cx = (ed.cx >= ll - 1) ? ll - 1 : (ed.cx + 1);
-    ed.col = (ed.col >= ll - 1) ? ll - 1 : (ed.col + 1);
+    size_t eol = get_line_len() - 1;
+    if (ed.cx >= eol) {
+        // TODO handle last line
+        try_move_cursor_down();
+        ed.col = 0;
+        resume_cx_desired_col();
+    } else {
+        ed.cx++;
+        ed.col = ed.cx;
+    }
 }
