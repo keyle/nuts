@@ -142,10 +142,10 @@ void draw_text_buffer(void) {
 void print_status_bar(void) {
     int height = tb_height();
     char temp[130];
-    size_t ll = get_line_len();
+    line_t l = get_line_len();
 
     // debug temporary print
-    sprintf(temp, "(%zu,%zu) cx %zu cy %zu | line %zu | ll %zu", (ed.cy - size_header + 1), (ed.cx - left_margin + 1), ed.cx, ed.cy, ed.line, ll);
+    sprintf(temp, "(%zu,%zu) cx %zu cy %zu | line %zu | (llen %zu, EOF %i)", (ed.cy - size_header + 1), (ed.cx - left_margin + 1), ed.cx, ed.cy, ed.line, l.llen, l.eof);
     tb_printf(2, height - 1, TB_BLACK | TB_BOLD | TB_ITALIC, FRAME_BG, temp);
 }
 

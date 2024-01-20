@@ -14,7 +14,7 @@ size_t max_height(void) {
 
 // TODO bad perf: should build this as an array of lines lenghts once
 // TODO: handle \r\n
-size_t get_line_len() {
+line_t get_line_len() {
     const char* file = ed.file_contents;
     bool found = false;
     size_t line = 0;
@@ -25,7 +25,7 @@ size_t get_line_len() {
         if (file[i] == '\n') {
             if (found) {
                 // printf("len %zd ", len);
-                return len;
+                return (line_t){.llen = len, .eof = false};
             }
             len = -1;
             line++;
@@ -37,14 +37,14 @@ size_t get_line_len() {
         i++;
     }
     // printf("len %d ", 0);
-    return 0;
+    return (line_t){.llen = len, .eof = true};
 }
 
 // called when moving up and down
 void resume_cx_desired_col() {
-    size_t ll = get_line_len();
-    ed.cx = ed.col;                       // move the cursor to the user's intended column
-    ed.cx = (ed.cx >= ll) ? ll : (ed.cx); // if cursor is past end of line, move it back
+    line_t l = get_line_len();
+    ed.cx = ed.col;                               // move the cursor to the user's intended column
+    ed.cx = (ed.cx >= l.llen) ? l.llen : (ed.cx); // if cursor is past end of line, move it back
 }
 
 void try_move_cursor_up() {
@@ -96,8 +96,8 @@ void try_move_cursor_left() {
 // move down and place the cursor on the first character
 // FIXME the first line has an extra char space
 void try_move_cursor_right() {
-    size_t ll = get_line_len();
-    if (ed.cx >= ll) {
+    line_t l = get_line_len();
+    if (ed.cx >= l.llen) {
         try_move_cursor_down();
         ed.col = 0;
         resume_cx_desired_col();
