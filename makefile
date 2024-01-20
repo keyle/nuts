@@ -2,14 +2,14 @@ COMPILER = clang
 APP = nuts
 EXT_LIBS =
 WARNINGS = -Wall -Wextra
-DEBUG_BUILD = -g -std=c2x -Wunused-variable
+DEBUG_BUILD = -Wunused-variable -std=c2x
 LEAKS_BUILD  = -fsanitize=address
 RELEASE_FLAGS = -std=c2x -O3
 CFILES = $(wildcard src/*.c)
 
 # Discover all .c files in the libs directory
 LIB_CFILES = $(wildcard libs/*.c)
-OBJ_FLAGS = -g -Wunused-variable -std=c2x
+OBJ_FLAGS = -Wunused-variable -std=c2x
 export ASAN_OPTIONS := allocator_may_return_null=1
 
 # Create object files list from CFILES and LIB_CFILES

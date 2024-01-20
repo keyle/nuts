@@ -94,28 +94,33 @@ const char* get_buffer_contents(void) {
 
 void draw_text_buffer(void) {
     const char* file = get_buffer_contents();
-    int draw_line_count = max_height() - size_header;
-
-    size_t i = 0;
-    char ch;
-    int x = 0, y = 0;
-    uint16_t color;
-
+    size_t draw_line_count = max_height() - size_header;
+    size_t skip_lines = ed.scroll_v_offset;
     bool in_dbl_quotes = false;
     bool in_sgl_quotes = false;
+    uint16_t color;
+    size_t i = 0;
+    size_t x = 0;
+    size_t y = 0;
+    char ch;
 
     do {
         color = TB_CYAN | TB_BOLD;
         ch = file[i];
         if (ch == '\n') {
+            if (skip_lines > 0)
+                skip_lines--;
             x = 0;
             y++;
-            if (y > draw_line_count)
+            if (y > draw_line_count + ed.scroll_v_offset)
                 break;
             continue;
         }
 
-        // flipping bits
+        if (skip_lines > 0) {
+            continue;
+        }
+
         if (ch == ASCII_SINGLE_QUOTE)
             in_sgl_quotes = !in_sgl_quotes;
         else if (ch == ASCII_DOUBLE_QUOTE)

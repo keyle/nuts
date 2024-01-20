@@ -15,11 +15,11 @@ size_t max_height(void) {
 // TODO bad perf: should build this as an array of lines lenghts once
 // TODO: handle \r\n
 size_t get_line_len() {
+    const char* file = ed.file_contents;
+    bool found = false;
     size_t line = 0;
     size_t len = 0;
     size_t i = 0;
-    bool found = false;
-    const char* file = ed.file_contents;
 
     while (i < strlen(file)) {
         if (file[i] == '\n') {
@@ -38,9 +38,15 @@ size_t get_line_len() {
     return 0;
 }
 
-void try_move_cursor_up() {
+// called when moving up and down
+void resume_cx_desired_col() {
     size_t ll;
+    ll = get_line_len();
+    ed.cx = ed.col;                               // move the cursor to the user's intended column
+    ed.cx = (ed.cx >= ll - 1) ? ll - 1 : (ed.cx); // if cursor is past end of line, move it back
+}
 
+void try_move_cursor_up() {
     if (ed.cy <= size_header) {
         if (ed.scroll_v_offset > 0) {
             ed.scroll_v_offset--;
@@ -52,15 +58,12 @@ void try_move_cursor_up() {
         ed.line--;
         assert(ed.line >= 0 && "line should not be negative");
     }
-    ll = get_line_len();
-    ed.cx = (ed.cx >= ll - 1) ? ll - 1 : (ed.cx); // if cursor is past end of line, move it back
-    if (ed.col < ll)
-        ed.cx = ed.col; // move the cursor to the user's intended column
+
+    resume_cx_desired_col();
 }
 
 void try_move_cursor_down() {
-    int mh = max_height();
-    size_t ll;
+    size_t mh = max_height();
 
     if (ed.cy >= mh) {
         ed.scroll_v_offset++;
@@ -69,10 +72,8 @@ void try_move_cursor_down() {
         ed.cy++;
         ed.line++;
     }
-    ll = get_line_len();
-    ed.cx = (ed.cx >= ll - 1) ? ll - 1 : (ed.cx);
-    if (ed.col < ll)
-        ed.cx = ed.col;
+
+    resume_cx_desired_col();
 }
 
 void try_move_cursor_left() {
@@ -80,9 +81,9 @@ void try_move_cursor_left() {
     ed.col = ed.col > left_margin ? (ed.col - 1) : left_margin;
 }
 
+// BUG the first line has an extra char space
 void try_move_cursor_right() {
     size_t ll;
-
     ll = get_line_len();
     ed.cx = (ed.cx >= ll - 1) ? ll - 1 : (ed.cx + 1);
     ed.col = (ed.col >= ll - 1) ? ll - 1 : (ed.col + 1);
