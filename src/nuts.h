@@ -48,5 +48,8 @@ size_t get_line_num(void);
 size_t get_line_num_len(size_t line);
 
 void try_move_cursor_up(void);
+void try_move_cursor_down(void);
+void try_move_cursor_left(void);
+void try_move_cursor_right(void);
 
 #endif

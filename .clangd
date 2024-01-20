@@ -1,0 +1,2 @@
+CompileFlags:
+	Add: [-Wall, -Wextra, -O2, -Wunused-parameter, -Wunused-variable, -std=c2x]

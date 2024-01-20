@@ -157,42 +157,21 @@ void render(void) {
 }
 
 void handle_key(struct tb_event ev) {
-    int mh = max_height();
-    int mw = max_width();
-    size_t ll;
-    size_t line_num;
-    size_t line_len;
-
     switch (ev.key) {
         case TB_KEY_ARROW_UP:
             try_move_cursor_up();
             break;
 
         case TB_KEY_ARROW_DOWN:
-            if (ed.cy >= mh) {
-                ed.scroll_v_offset++;
-                ed.line++;
-            } else {
-                ed.cy++;
-                ed.line++;
-            }
-            ll = get_line_len();
-            ed.cx = (ed.cx >= ll - 1) ? ll - 1 : (ed.cx);
-            if (ed.col < ll)
-                ed.cx = ed.col;
+            try_move_cursor_down();
             break;
 
         case TB_KEY_ARROW_LEFT:
-            ed.cx = (ed.cx > left_margin) ? (ed.cx - 1) : left_margin;
-            ed.col = ed.col > left_margin ? (ed.col - 1) : left_margin;
+            try_move_cursor_left();
             break;
 
         case TB_KEY_ARROW_RIGHT:
-            line_num = get_line_num();
-            line_len = get_line_num_len(line_num);
-            ll = get_line_len();
-            ed.cx = (ed.cx >= ll - 1) ? ll - 1 : (ed.cx + 1);
-            ed.col = (ed.col >= ll - 1) ? ll - 1 : (ed.col + 1);
+            try_move_cursor_right();
             break;
     }
 }

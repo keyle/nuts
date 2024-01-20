@@ -75,11 +75,7 @@ size_t get_line_len() {
 }
 
 void try_move_cursor_up() {
-    int mh = max_height();
-    int mw = max_width();
     size_t ll;
-    size_t line_num;
-    size_t line_len;
 
     if (ed.cy <= size_header) {
         if (ed.scroll_v_offset > 0) {
@@ -96,4 +92,38 @@ void try_move_cursor_up() {
     ed.cx = (ed.cx >= ll - 1) ? ll - 1 : (ed.cx); // if cursor is past end of line, move it back
     if (ed.col < ll)
         ed.cx = ed.col; // move the cursor to the user's intended column
+}
+
+void try_move_cursor_down() {
+    int mh = max_height();
+    size_t ll;
+
+    if (ed.cy >= mh) {
+        ed.scroll_v_offset++;
+        ed.line++;
+    } else {
+        ed.cy++;
+        ed.line++;
+    }
+    ll = get_line_len();
+    ed.cx = (ed.cx >= ll - 1) ? ll - 1 : (ed.cx);
+    if (ed.col < ll)
+        ed.cx = ed.col;
+}
+
+void try_move_cursor_left() {
+    ed.cx = (ed.cx > left_margin) ? (ed.cx - 1) : left_margin;
+    ed.col = ed.col > left_margin ? (ed.col - 1) : left_margin;
+}
+
+void try_move_cursor_right() {
+    size_t ll;
+    size_t line_num;
+    size_t line_len;
+
+    line_num = get_line_num();
+    line_len = get_line_num_len(line_num);
+    ll = get_line_len();
+    ed.cx = (ed.cx >= ll - 1) ? ll - 1 : (ed.cx + 1);
+    ed.col = (ed.col >= ll - 1) ? ll - 1 : (ed.col + 1);
 }
