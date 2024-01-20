@@ -1,4 +1,6 @@
-### nuts ("it has the nuts")
+### nuts 
+
+_"it has the nuts"_
 
 Terminal IDE inspired by the DOS Borland C++/Turbo IDE of the 90s.
 
