@@ -139,11 +139,8 @@ void print_status_bar(void) {
     char temp[130];
     size_t ll = get_line_len();
 
-    size_t line_num = get_line_num();
-    size_t line_len = get_line_num_len(line_num);
-
     // debug temporary print
-    sprintf(temp, "(%i,%i) cx %i cy %i | line %zu | ll %zu | ln %zu | llen %zu", (ed.cy - size_header + 1), (ed.cx - left_margin + 1), ed.cx, ed.cy, ed.line, ll, line_num, line_len);
+    sprintf(temp, "(%zu,%zu) cx %zu cy %zu | line %zu | ll %zu", (ed.cy - size_header + 1), (ed.cx - left_margin + 1), ed.cx, ed.cy, ed.line, ll);
     tb_printf(2, height - 1, TB_BLACK | TB_BOLD | TB_ITALIC, FRAME_BG, temp);
 }
 

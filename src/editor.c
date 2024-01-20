@@ -4,48 +4,12 @@ editor_t ed_init(void) {
     return (editor_t){.cx = left_margin, .cy = size_header};
 }
 
-int max_width(void) {
+size_t max_width(void) {
     return tb_width() - right_margin;
 }
 
-int max_height(void) {
+size_t max_height(void) {
     return tb_height() - size_footer;
-}
-
-size_t get_line_num() {
-    size_t line = 0;
-    size_t i = 0;
-    const char* file = ed.file_contents;
-
-    while (i < strlen(file)) {
-        if (file[i] == '\n') {
-            line++;
-        }
-        if (line == ed.line) {
-            return i;
-        }
-        i++;
-    }
-    return 0;
-}
-
-size_t get_line_num_len(size_t line) {
-    size_t len = 0;
-    size_t i = 0;
-    const char* file = ed.file_contents;
-
-    while (i < strlen(file)) {
-        if (file[i] == '\n') {
-            if (line == 0) {
-                return len;
-            }
-            len = 0;
-            line--;
-        }
-        len++;
-        i++;
-    }
-    return 0;
 }
 
 // TODO bad perf: should build this as an array of lines lenghts once
@@ -118,11 +82,7 @@ void try_move_cursor_left() {
 
 void try_move_cursor_right() {
     size_t ll;
-    size_t line_num;
-    size_t line_len;
 
-    line_num = get_line_num();
-    line_len = get_line_num_len(line_num);
     ll = get_line_len();
     ed.cx = (ed.cx >= ll - 1) ? ll - 1 : (ed.cx + 1);
     ed.col = (ed.col >= ll - 1) ? ll - 1 : (ed.col + 1);
