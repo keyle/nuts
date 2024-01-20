@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "nuts.h"
 
 editor_t ed_init(void) {
@@ -24,9 +25,10 @@ size_t get_line_len() {
     while (i < strlen(file)) {
         if (file[i] == '\n') {
             if (found) {
+                // printf("len %zd ", len);
                 return len;
             }
-            len = 0;
+            len = -1;
             line++;
         }
         if (line == ed.line) {
@@ -35,15 +37,15 @@ size_t get_line_len() {
         len++;
         i++;
     }
-    return 0;
+    // printf("len %zu ", SIZE_MAX);
+    return SIZE_MAX;
 }
 
 // called when moving up and down
 void resume_cx_desired_col() {
-    size_t ll;
-    ll = get_line_len();
-    ed.cx = ed.col;                               // move the cursor to the user's intended column
-    ed.cx = (ed.cx >= ll - 1) ? ll - 1 : (ed.cx); // if cursor is past end of line, move it back
+    size_t ll = get_line_len();
+    ed.cx = ed.col;                       // move the cursor to the user's intended column
+    ed.cx = (ed.cx >= ll) ? ll : (ed.cx); // if cursor is past end of line, move it back
 }
 
 void try_move_cursor_up() {
@@ -95,13 +97,14 @@ void try_move_cursor_left() {
 // move down and place the cursor on the first character
 // FIXME the first line has an extra char space
 void try_move_cursor_right() {
-    size_t eol = get_line_len() - 1;
-    if (ed.cx >= eol) {
-        // TODO handle last line
+    size_t ll = get_line_len();
+    if (ed.cx >= ll) {
+        if (ll == SIZE_MAX)
+            return;
         try_move_cursor_down();
         ed.col = 0;
         resume_cx_desired_col();
-    } else {
+    } else if (ll != SIZE_MAX) {
         ed.cx++;
         ed.col = ed.cx;
     }
