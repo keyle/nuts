@@ -30,6 +30,8 @@ struct editor_s {
     char* file_contents;
     size_t scroll_v_offset; // vertical offset into file buffer, what is skipped from rendering, in lines
     size_t scroll_h_offset; // horizontal offset
+    size_t pos;             // position in the buffer
+    size_t len;             // size of the buffer
     size_t line;            // current line in the buffer
     size_t col;             // intended column (intended by the user, used when moving cursor)
     size_t cx;              // screen coordinates

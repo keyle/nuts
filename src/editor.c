@@ -1,4 +1,3 @@
-#include <stdint.h>
 #include "nuts.h"
 
 editor_t ed_init(void) {
@@ -37,8 +36,8 @@ size_t get_line_len() {
         len++;
         i++;
     }
-    // printf("len %zu ", SIZE_MAX);
-    return SIZE_MAX;
+    // printf("len %d ", 0);
+    return 0;
 }
 
 // called when moving up and down
@@ -99,12 +98,10 @@ void try_move_cursor_left() {
 void try_move_cursor_right() {
     size_t ll = get_line_len();
     if (ed.cx >= ll) {
-        if (ll == SIZE_MAX)
-            return;
         try_move_cursor_down();
         ed.col = 0;
         resume_cx_desired_col();
-    } else if (ll != SIZE_MAX) {
+    } else {
         ed.cx++;
         ed.col = ed.cx;
     }
