@@ -206,13 +206,15 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    filepath = malloc(strlen(cwd) + strlen(argv[1]) + 2);
+    size_t filepathlen = strlen(cwd) + strlen(argv[1]) + 2;
+    filepath = malloc(filepathlen);
+
     if (filepath == NULL) {
         perror("malloc filepath failed.");
         return 1;
     }
 
-    sprintf(filepath, "%s/%s", cwd, argv[1]); // full path
+    snprintf(filepath, filepathlen, "%s/%s", cwd, argv[1]); // full path
 
     int ret = tb_init();
     ed = ed_init();
