@@ -12,7 +12,7 @@ I hack on it when I have some free time. This might take a while.
 
 #### License
 
-AGPL 3.0 licensed.
+BSD-3
 
 #### Run
 
