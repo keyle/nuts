@@ -72,7 +72,7 @@ void draw_frame(void) {
 
     /********/
 
-    tb_printf(width - 10, height - 1, TB_RED | TB_BOLD, FRAME_BG, "F12");
+    tb_printf(width - 10, height - 1, TB_RED | TB_BOLD, FRAME_BG, "F10");
     tb_printf(width - 6, height - 1, TB_BLACK | TB_BOLD, FRAME_BG, "QUIT");
 }
 
@@ -80,7 +80,7 @@ const char* get_buffer_contents(void) {
     if (ed.file_contents) {
         return ed.file_contents;
     } else {
-        const char* file = "/Users/n/Code/site-gen-c/src/settings.c";
+        const char* file = "/home/keyle/code/nuts/src/nuts.c";
         file_t res = read_file_content(file);
         if (res.error) {
             tb_shutdown();
@@ -145,7 +145,7 @@ void print_status_bar(void) {
     line_t l = get_line_len();
 
     // debug temporary print
-    sprintf(temp, "(%zu,%zu) cx %zu cy %zu | line %zu | (llen %zu, EOF %i)", (ed.cy - size_header + 1), (ed.cx - left_margin + 1), ed.cx, ed.cy, ed.line, l.llen, l.eof);
+    snprintf(temp, 130, "(%ld,%ld) cx %ld cy %ld | line %ld | (llen %ld, EOF %i)", (ed.cy - size_header + 1), (ed.cx - left_margin + 1), ed.cx, ed.cy, ed.line, l.llen, l.eof);
     tb_printf(2, height - 1, TB_BLACK | TB_BOLD | TB_ITALIC, FRAME_BG, temp);
 }
 
@@ -160,12 +160,28 @@ void render(void) {
 
 void handle_key(struct tb_event ev) {
     switch (ev.key) {
+        case TB_KEY_HOME:
+            move_start();
+            break;
+
+        case TB_KEY_END:
+            move_end();
+            break;
+
         case TB_KEY_ARROW_UP:
-            try_move_cursor_up();
+            try_move_cursor_up(1);
+            break;
+
+        case TB_KEY_PGUP:
+            try_move_cursor_up(page_updn_lines);
             break;
 
         case TB_KEY_ARROW_DOWN:
-            try_move_cursor_down();
+            try_move_cursor_down(1);
+            break;
+
+        case TB_KEY_PGDN:
+            try_move_cursor_down(page_updn_lines);
             break;
 
         case TB_KEY_ARROW_LEFT:
@@ -198,7 +214,7 @@ int main(void) {
         if (res == TB_OK) {
             switch (ev.type) {
                 case (TB_EVENT_KEY):
-                    if (ev.key == TB_KEY_CTRL_Q || ev.key == TB_KEY_F12)
+                    if (ev.key == TB_KEY_CTRL_Q || ev.key == TB_KEY_F10)
                         goto RIP;
                     handle_key(ev);
                     break;

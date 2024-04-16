@@ -12,12 +12,25 @@ size_t max_height(void) {
     return tb_height() - size_footer;
 }
 
+size_t max_line(void) {
+    const char* file = ed.file_contents;
+    size_t i = 0;
+    size_t line = 0;
+
+    while(i < strlen(file)) {
+        if(file[i] == '\n') line++;
+        i++;
+    }
+
+    return line;
+}
+
 // TODO bad perf: should build this as an array of lines lenghts once
 // TODO: handle \r\n
 line_t get_line_len() {
     const char* file = ed.file_contents;
     bool found = false;
-    size_t line = 0;
+    long line = 0;
     size_t len = 0;
     size_t i = 0;
 
@@ -47,35 +60,58 @@ void resume_cx_desired_col() {
     ed.cx = (ed.cx >= l.llen) ? l.llen : (ed.cx); // if cursor is past end of line, move it back
 }
 
-void try_move_cursor_up() {
-    if (ed.cy <= size_header) {
-        if (ed.scroll_v_offset > 0) {
-            ed.scroll_v_offset--;
+void move_start() {
+    ed.cx = 0;
+    ed.cy = size_header; // 0 would be the screen to, we need the header offset
+    ed.scroll_v_offset = 0;
+    ed.line = 0;
+}
+
+void try_move_cursor_up(int lc) {
+    while(lc-- > 0) {
+        if (ed.cy <= size_header) {
+            if (ed.scroll_v_offset > 0) {
+                ed.scroll_v_offset--;
+                ed.line--;
+                assert(ed.line >= 0 && "line should not be negative");
+            }
+        } else {
+            ed.cy--;
             ed.line--;
             assert(ed.line >= 0 && "line should not be negative");
         }
-    } else {
-        ed.cy--;
-        ed.line--;
-        assert(ed.line >= 0 && "line should not be negative");
     }
 
     resume_cx_desired_col();
 }
 
-void try_move_cursor_down() {
+void move_end() {
     size_t mh = max_height();
+    size_t ml = max_line();
 
-    if (ed.cy >= mh) {
-        ed.scroll_v_offset++;
-        ed.line++;
-    } else {
-        ed.cy++;
-        ed.line++;
+    ed.scroll_v_offset = ml - mh + eof_padding;
+    ed.line = ml;
+    ed.cy = mh;
+}
+
+void try_move_cursor_down(int lc) {
+    long mh = max_height();
+    long ml = max_line();
+
+    if(ed.line >= ml + eof_padding) return;
+
+    while(lc-- > 0) {
+        if (ed.cy >= mh) {
+            ed.scroll_v_offset++;
+            ed.line++;
+        } else {
+            ed.cy++;
+            ed.line++;
+        }
     }
-
     resume_cx_desired_col();
 }
+
 
 // Move left, if it's the first char, and if we're not on the first line:
 // move up and place the cursor at the end of the line
@@ -83,7 +119,7 @@ void try_move_cursor_left() {
     if (ed.cx <= left_margin) {
         if (ed.line == 0)
             return;
-        try_move_cursor_up();
+        try_move_cursor_up(1);
         ed.col = max_width();
         resume_cx_desired_col();
     } else {
@@ -98,7 +134,7 @@ void try_move_cursor_left() {
 void try_move_cursor_right() {
     line_t l = get_line_len();
     if (ed.cx >= l.llen) {
-        try_move_cursor_down();
+        try_move_cursor_down(1);
         ed.col = 0;
         resume_cx_desired_col();
     } else {

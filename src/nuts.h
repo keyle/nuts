@@ -1,6 +1,7 @@
 #ifndef __nuts_h
 #define __nuts_h
 
+#include <signal.h>
 #include "termbox2.h"
 #include "files.h"
 
@@ -24,21 +25,23 @@
 #define size_footer 2
 #define left_margin 0
 #define right_margin 2
+#define eof_padding 16
+#define page_updn_lines 16
 
 typedef struct {
     char* file_contents;
-    size_t scroll_v_offset; // vertical offset into file buffer, what is skipped from rendering, in lines
-    size_t scroll_h_offset; // horizontal offset
-    // size_t pos;             // position in the buffer
-    // size_t len;             // size of the buffer
-    size_t line; // current line in the buffer
-    size_t col;  // intended column (intended by the user, used when moving cursor)
-    size_t cx;   // screen coordinates
-    size_t cy;   // starts at 2 due to header
+    long scroll_v_offset; // vertical offset into file buffer, what is skipped from rendering, in lines
+    long scroll_h_offset; // horizontal offset
+    // long pos;             // position in the buffer
+    // long len;             // size of the buffer
+    long line; // current line in the buffer
+    long col;  // intended column (intended by the user, used when moving cursor)
+    long cx;   // screen coordinates
+    long cy;   // starts at 2 due to header
 } editor_t;
 
 typedef struct {
-    size_t llen;
+    long llen;
     bool eof;
 } line_t;
 
@@ -51,9 +54,12 @@ size_t max_height(void);
 
 line_t get_line_len(void);
 
-void try_move_cursor_up(void);
-void try_move_cursor_down(void);
+void try_move_cursor_up(int lc); // line count, 1 or page_updn_lines
+void try_move_cursor_down(int lc);
 void try_move_cursor_left(void);
 void try_move_cursor_right(void);
+
+void move_start(void);
+void move_end(void);
 
 #endif
