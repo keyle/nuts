@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 editor_t ed = {0};
+char* filepath;
 
 void print_word(int x, int y, const char text[static 1]) {
     int i = 0;
@@ -80,11 +81,10 @@ const char* get_buffer_contents(void) {
     if (ed.file_contents) {
         return ed.file_contents;
     } else {
-        const char* file = "/home/keyle/code/nuts/src/nuts.c";
-        file_t res = read_file_content(file);
+        file_t res = read_file_content(filepath);
         if (res.error) {
             tb_shutdown();
-            fprintf(stderr, "Could not load file... %s\n", file);
+            fprintf(stderr, "Could not load file... %s\n", filepath);
             exit(1);
         }
         ed.file_contents = res.data;
@@ -194,12 +194,31 @@ void handle_key(struct tb_event ev) {
     }
 }
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
+        return 1;
+    }
+
+    char cwd[1024];
+    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        perror("getcwd failed");
+        return 1;
+    }
+
+    filepath = malloc(strlen(cwd) + strlen(argv[1]) + 2);
+    if (filepath == NULL) {
+        perror("malloc filepath failed.");
+        return 1;
+    }
+
+    sprintf(filepath, "%s/%s", cwd, argv[1]); // full path
+
     int ret = tb_init();
     ed = ed_init();
 
     if (ret) {
-        fprintf(stderr, "Could not even TUI, bro.");
+        fprintf(stderr, "Could not even TUI, bro.\n");
         exit(1);
     }
 
@@ -236,5 +255,6 @@ int main(void) {
 
 RIP:
     tb_shutdown();
+    free(filepath);
     return 0;
 }
