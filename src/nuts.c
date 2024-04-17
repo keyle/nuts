@@ -78,8 +78,8 @@ void draw_frame(void) {
 }
 
 const char* get_buffer_contents(void) {
-    if (ed.file_contents) {
-        return ed.file_contents;
+    if (ed.contents.data) {
+        return ed.contents.data;
     } else {
         file_t res = read_file_content(filepath);
         if (res.error) {
@@ -87,56 +87,63 @@ const char* get_buffer_contents(void) {
             fprintf(stderr, "Could not load file... %s\n", filepath);
             exit(1);
         }
-        ed.file_contents = res.data;
-        return ed.file_contents;
+        ed.contents = res;
+        return ed.contents.data;
     }
+}
+
+uint16_t determine_color(char ch) {
+    if (ch == '\'' || ch == '\"')
+        return TB_GREEN | TB_BOLD; // strings
+    else if (isalpha(ch))
+        return FG; // a-Z
+    else if (isdigit(ch))
+        return TB_GREEN | TB_BOLD; // numbers
+    return TB_CYAN | TB_BOLD;      // default
 }
 
 void draw_text_buffer(void) {
     const char* file = get_buffer_contents();
     size_t draw_line_count = max_height() - size_header;
     size_t skip_lines = ed.scroll_v_offset;
-    bool in_dbl_quotes = false;
-    bool in_sgl_quotes = false;
     uint16_t color;
-    size_t i = 0;
-    size_t x = 0;
-    size_t y = 0;
-    char ch;
+    size_t i = 0, x = 0, y = 0;
 
-    do {
-        color = TB_CYAN | TB_BOLD;
-        ch = file[i];
+    while (file[i] != '\0') {
+        char ch = file[i];
+
+        // Handle newline
         if (ch == '\n') {
             if (skip_lines > 0)
                 skip_lines--;
-            x = 0;
-            y++;
+            else {
+                x = 0;
+                y++;
+            }
             if (y > draw_line_count + ed.scroll_v_offset)
                 break;
+            i++;
             continue;
         }
 
         if (skip_lines > 0) {
+            i++;
             continue;
         }
 
-        if (ch == ASCII_SINGLE_QUOTE)
-            in_sgl_quotes = !in_sgl_quotes;
-        else if (ch == ASCII_DOUBLE_QUOTE)
-            in_dbl_quotes = !in_dbl_quotes;
+        // Handle special characters (e.g., control characters)
+        if (ch < ' ' || ch > '~') { // Non-printable characters
+            i++;
+            continue; // Skip rendering
+        }
+        // Set cell color based on content
+        color = determine_color(ch);
 
-        // colouring
-        if (in_dbl_quotes || in_sgl_quotes || ch == ASCII_SINGLE_QUOTE || ch == ASCII_DOUBLE_QUOTE)
-            color = TB_GREEN | TB_BOLD; // strings
-        else if ((ch >= ASCII_UPPER_A && ch <= ASCII_UPPER_Z) || (ch >= ASCII_LOWER_A && ch <= ASCII_LOWER_Z))
-            color = FG; // a-Z
-        else if (ch >= ASCII_0 && ch <= ASCII_9)
-            color = TB_GREEN | TB_BOLD; // numbers
-
-        tb_set_cell((x++) + left_margin - ed.scroll_h_offset, y + size_header - ed.scroll_v_offset, ch, color, SCREEN_BG);
-
-    } while (file[++i] != '\0');
+        // Set character cell
+        tb_set_cell(x + left_margin - ed.scroll_h_offset, y + size_header - ed.scroll_v_offset, ch, color, SCREEN_BG);
+        x++;
+        i++;
+    }
 }
 
 void print_status_bar(void) {
@@ -159,6 +166,14 @@ void render(void) {
 }
 
 void handle_key(struct tb_event ev) {
+    if (ev.key <= TB_KEY_F1 && ev.key >= TB_KEY_F12) {
+        return;
+    }
+
+    if (ev.key == TB_KEY_F1)
+        return;
+
+    // TODO handle meta, ctrl, alt ...
     switch (ev.key) {
         case TB_KEY_HOME:
             move_start();
@@ -191,6 +206,26 @@ void handle_key(struct tb_event ev) {
         case TB_KEY_ARROW_RIGHT:
             try_move_cursor_right();
             break;
+
+        case TB_KEY_ENTER:
+            enter_ch();
+            break;
+
+        case TB_KEY_TAB:
+            tab_ch();
+            break;
+
+        case TB_KEY_BACKSPACE:
+        case TB_KEY_BACKSPACE2:
+            backspace_ch();
+            break;
+
+        case TB_KEY_DELETE:
+            delete_ch();
+            break;
+
+        default:
+            insert_ch(ev.ch);
     }
 }
 

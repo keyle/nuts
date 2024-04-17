@@ -13,12 +13,13 @@ size_t max_height(void) {
 }
 
 size_t max_line(void) {
-    const char* file = ed.file_contents;
+    const char* file = ed.contents.data;
     size_t i = 0;
     size_t line = 0;
 
-    while(i < strlen(file)) {
-        if(file[i] == '\n') line++;
+    while (i < strlen(file)) {
+        if (file[i] == '\n')
+            line++;
         i++;
     }
 
@@ -28,7 +29,7 @@ size_t max_line(void) {
 // TODO bad perf: should build this as an array of lines lenghts once
 // TODO: handle \r\n
 line_t get_line_len() {
-    const char* file = ed.file_contents;
+    const char* file = ed.contents.data;
     bool found = false;
     long line = 0;
     size_t len = 0;
@@ -68,7 +69,7 @@ void move_start() {
 }
 
 void try_move_cursor_up(int lc) {
-    while(lc-- > 0) {
+    while (lc-- > 0) {
         if (ed.cy <= size_header) {
             if (ed.scroll_v_offset > 0) {
                 ed.scroll_v_offset--;
@@ -98,9 +99,10 @@ void try_move_cursor_down(int lc) {
     long mh = max_height();
     long ml = max_line();
 
-    if(ed.line >= ml + eof_padding) return;
+    if (ed.line >= ml + eof_padding)
+        return;
 
-    while(lc-- > 0) {
+    while (lc-- > 0) {
         if (ed.cy >= mh) {
             ed.scroll_v_offset++;
             ed.line++;
@@ -111,7 +113,6 @@ void try_move_cursor_down(int lc) {
     }
     resume_cx_desired_col();
 }
-
 
 // Move left, if it's the first char, and if we're not on the first line:
 // move up and place the cursor at the end of the line
@@ -141,4 +142,66 @@ void try_move_cursor_right() {
         ed.cx++;
         ed.col = ed.cx;
     }
+}
+
+size_t pos_in_buffer(void) {
+    size_t i = 0;
+    long lc = ed.line;
+    long cc = ed.col;
+
+    while (i < ed.contents.size) {
+        if (lc > 0) {
+            if (ed.contents.data[i] == '\n') {
+                lc--;
+            }
+            i++;
+            continue;
+        }
+        if (cc > 0) {
+            cc--;
+            i++;
+            continue;
+        }
+        return i;
+    }
+
+    return 0;
+}
+
+void insert_ch(char ch) {
+    size_t i = pos_in_buffer();
+    if (ed.contents.size >= ed.contents.cap) {
+        // Reallocate to a larger size
+        size_t new_cap = ed.contents.cap * 1.5;
+        char* new_data = realloc(ed.contents.data, new_cap);
+        if (!new_data) {
+            perror("Failed to reallocate memory");
+            return;
+        }
+        ed.contents.data = new_data;
+        ed.contents.cap = new_cap;
+    }
+
+    // Shift characters right to make space for the new character
+    for (size_t j = ed.contents.size; j > i; j--) {
+        ed.contents.data[j] = ed.contents.data[j - 1];
+    }
+
+    // Insert the new character
+    ed.contents.data[i] = ch;
+    ed.contents.size++;
+    try_move_cursor_right();
+}
+
+// TODO 'special' characters
+void enter_ch(void) {
+}
+
+void tab_ch(void) {
+}
+
+void backspace_ch(void) {
+}
+
+void delete_ch(void) {
 }

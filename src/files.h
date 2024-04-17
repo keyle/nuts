@@ -7,6 +7,7 @@
 typedef struct file_t {
     char* data;
     size_t size;
+    size_t cap;
     bool error;
 } file_t;
 

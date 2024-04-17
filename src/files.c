@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <strings.h>
 
+#define buffer_writing_pad 200
+
 file_t read_file_content(const char file_name[static 1]) {
     FILE* fp = fopen(file_name, "r");
 
@@ -14,7 +16,9 @@ file_t read_file_content(const char file_name[static 1]) {
     size_t file_size = ftell(fp);
     rewind(fp);
 
-    char* content = (char*)malloc(file_size + 1);
+    size_t cap = file_size + 1 + buffer_writing_pad;
+
+    char* content = (char*)malloc(cap);
     if (!content) {
         fprintf(stderr, "Failed to allocate memory in read_file_content()\n");
         fclose(fp);
@@ -32,7 +36,7 @@ file_t read_file_content(const char file_name[static 1]) {
     content[file_size] = '\0'; // bug fix, sometimes we would keep going!
 
     fclose(fp);
-    return (file_t){.data = content, .size = file_size, .error = false};
+    return (file_t){.data = content, .size = file_size, .cap = cap, .error = false};
 }
 
 result_t write_file_content(const char file_path[static 1], const char contents[static 1]) {

@@ -29,11 +29,10 @@
 #define page_updn_lines 16
 
 typedef struct {
-    char* file_contents;
+    file_t contents;
     long scroll_v_offset; // vertical offset into file buffer, what is skipped from rendering, in lines
     long scroll_h_offset; // horizontal offset
-    // long pos;             // position in the buffer
-    // long len;             // size of the buffer
+    //  long pos;             // position in the buffer -- use line + col
     long line; // current line in the buffer
     long col;  // intended column (intended by the user, used when moving cursor)
     long cx;   // screen coordinates
@@ -58,6 +57,12 @@ void try_move_cursor_up(int lc); // line count, 1 or page_updn_lines
 void try_move_cursor_down(int lc);
 void try_move_cursor_left(void);
 void try_move_cursor_right(void);
+
+void insert_ch(char ch);
+void enter_ch(void);
+void tab_ch(void);
+void delete_ch(void);
+void backspace_ch(void);
 
 void move_start(void);
 void move_end(void);
