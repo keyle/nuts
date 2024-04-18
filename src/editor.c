@@ -195,13 +195,27 @@ void insert_ch(char ch) {
 
 // TODO 'special' characters
 void enter_ch(void) {
+    insert_ch('\n');
 }
 
 void tab_ch(void) {
+    insert_ch(' ');
+    insert_ch(' ');
+    insert_ch(' ');
+    insert_ch(' ');
+}
+
+void delete_ch(int offset) {
+    size_t i = MAX(0, pos_in_buffer() + offset);
+
+    for (size_t j = i; j < ed.contents.size - 1; j++) {
+        ed.contents.data[j] = ed.contents.data[j + 1];
+    }
+
+    ed.contents.size--;
 }
 
 void backspace_ch(void) {
-}
-
-void delete_ch(void) {
+    delete_ch(-1);
+    try_move_cursor_left();
 }

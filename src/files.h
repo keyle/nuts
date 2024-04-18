@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#define buffer_writing_pad 200
+
 typedef struct file_t {
     char* data;
     size_t size;

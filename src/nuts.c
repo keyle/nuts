@@ -221,7 +221,7 @@ void handle_key(struct tb_event ev) {
             break;
 
         case TB_KEY_DELETE:
-            delete_ch();
+            delete_ch(0);
             break;
 
         default:

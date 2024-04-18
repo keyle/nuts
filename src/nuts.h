@@ -28,6 +28,9 @@
 #define eof_padding 16
 #define page_updn_lines 16
 
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 typedef struct {
     file_t contents;
     long scroll_v_offset; // vertical offset into file buffer, what is skipped from rendering, in lines
@@ -61,8 +64,8 @@ void try_move_cursor_right(void);
 void insert_ch(char ch);
 void enter_ch(void);
 void tab_ch(void);
-void delete_ch(void);
-void backspace_ch(void);
+void delete_ch(int offset);
+void backspace_ch();
 
 void move_start(void);
 void move_end(void);

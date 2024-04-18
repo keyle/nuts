@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include <strings.h>
 
-#define buffer_writing_pad 200
-
 file_t read_file_content(const char file_name[static 1]) {
     FILE* fp = fopen(file_name, "r");
 
