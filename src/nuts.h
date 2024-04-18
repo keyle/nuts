@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <stdint.h>
+#include <stdarg.h> // variadic func params
 
 #define ASCII_SINGLE_QUOTE 39
 #define ASCII_DOUBLE_QUOTE 34
@@ -27,6 +28,7 @@
 #define right_margin 2
 #define eof_padding 16
 #define page_updn_lines 16
+#define FILE_PATH_MAX_LEN 4096 + 255
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
@@ -40,6 +42,9 @@ typedef struct {
     long col;  // intended column (intended by the user, used when moving cursor)
     long cx;   // screen coordinates
     long cy;   // starts at 2 due to header
+    char file_path[FILE_PATH_MAX_LEN];
+    char status[150];
+
 } editor_t;
 
 typedef struct {
@@ -53,6 +58,9 @@ editor_t ed_init(void);
 
 size_t max_width(void);
 size_t max_height(void);
+
+// utils
+void status_write(const char *format, ...);
 
 void handle_key(struct tb_event ev);
 
@@ -71,5 +79,7 @@ void backspace_ch();
 
 void move_start(void);
 void move_end(void);
+
+void func_save(void);
 
 #endif

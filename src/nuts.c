@@ -6,7 +6,6 @@
 #include <stdint.h>
 
 editor_t ed = {0};
-char* filepath;
 
 void print_word(int x, int y, const char text[static 1]) {
     int i = 0;
@@ -81,13 +80,16 @@ const char* get_buffer_contents(void) {
     if (ed.contents.data) {
         return ed.contents.data;
     } else {
-        file_t res = read_file_content(filepath);
+        file_t res = read_file_content(ed.file_path);
         if (res.error) {
             tb_shutdown();
-            fprintf(stderr, "Could not load file... %s\n", filepath);
+            fprintf(stderr, "Could not load file... %s\n", ed.file_path);
             exit(1);
         }
         ed.contents = res;
+
+        status_write("Loaded %s", ed.file_path);
+
         return ed.contents.data;
     }
 }
@@ -153,7 +155,9 @@ void print_status_bar(void) {
 
     // debug temporary print
     snprintf(temp, 130, "(%ld,%ld) cx %ld cy %ld | line %ld | (llen %ld, EOF %i)", (ed.cy - size_header + 1), (ed.cx - left_margin + 1), ed.cx, ed.cy, ed.line, l.llen, l.eof);
-    tb_printf(2, height - 1, TB_BLACK | TB_BOLD | TB_ITALIC, FRAME_BG, temp);
+    tb_printf((tb_width() >> 1) - 30, height - 1, TB_BLACK | TB_BOLD | TB_ITALIC, FRAME_BG, temp);
+
+    tb_printf(0, height - 1, TB_BLACK | TB_BOLD | TB_ITALIC, FRAME_BG, ed.status);
 }
 
 void render(void) {
@@ -177,18 +181,11 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    size_t filepathlen = strlen(cwd) + strlen(argv[1]) + 2;
-    filepath = malloc(filepathlen);
-
-    if (filepath == NULL) {
-        perror("malloc filepath failed.");
-        return 1;
-    }
-
-    snprintf(filepath, filepathlen, "%s/%s", cwd, argv[1]); // full path
-
     int ret = tb_init();
     ed = ed_init();
+
+    size_t filepathlen = strlen(cwd) + strlen(argv[1]) + 2;
+    snprintf(ed.file_path, MIN(filepathlen, FILE_PATH_MAX_LEN), "%s/%s", cwd, argv[1]); // full path
 
     if (ret) {
         fprintf(stderr, "Could not even TUI, bro.\n");
@@ -228,6 +225,5 @@ int main(int argc, char* argv[]) {
 
 RIP:
     tb_shutdown();
-    free(filepath);
     return 0;
 }
