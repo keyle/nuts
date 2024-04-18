@@ -54,6 +54,8 @@ editor_t ed_init(void);
 size_t max_width(void);
 size_t max_height(void);
 
+void handle_key(struct tb_event ev);
+
 line_t get_line_len(void);
 
 void try_move_cursor_up(int lc); // line count, 1 or page_updn_lines
