@@ -48,7 +48,7 @@ void draw_frame(void) {
 
     for (i = 0; i < width; i++) {
         tb_set_cell(i, 0, 0, 0, FRAME_BG);
-        tb_set_cell(i, 1, 0, 0, SCREEN_BG);
+        // tb_set_cell(i, 1, 0, 0, SCREEN_BG);
         tb_set_cell(i, height - 1, 0, 0, FRAME_BG);
     }
 
@@ -100,8 +100,8 @@ uint16_t determine_color(char ch) {
     else if (isalpha(ch))
         return FG; // a-Z
     else if (isdigit(ch))
-        return TB_GREEN | TB_BOLD; // numbers
-    return TB_CYAN | TB_BOLD;      // default
+        return TB_GREEN; // numbers
+    return TB_BLUE;      // default
 }
 
 void draw_text_buffer(void) {
@@ -110,20 +110,25 @@ void draw_text_buffer(void) {
     size_t skip_lines = ed.scroll_v_offset;
     uint16_t color;
     size_t i = 0, x = 0, y = 0;
+    bool within_line_comment = false;
+    bool within_string_literal = false;
+    bool in_multiline_comment = false;
 
     while (file[i] != '\0') {
         char ch = file[i];
 
         // Handle newline
         if (ch == '\n') {
-            if (skip_lines > 0)
+            if (skip_lines > 0) {
                 skip_lines--;
-            else {
-                x = 0;
-                y++;
+            } else {
+                // did return line
+                within_line_comment = false;
             }
+            x = 0;
+            y++;
             if (y > draw_line_count + ed.scroll_v_offset)
-                break;
+                break; // stop rendering
             i++;
             continue;
         }
@@ -138,8 +143,32 @@ void draw_text_buffer(void) {
             i++;
             continue; // Skip rendering
         }
+
+        if (!within_line_comment && ch == '/' && i + 1 < strlen(file) && file[i + 1] == '*') {
+            in_multiline_comment = true;
+        }
+
+        if (ch == '/') {
+            if (i + 1 < strlen(file) && file[i + 1] == '/') {
+                within_line_comment = true;
+            }
+        }
+
+        if (!within_line_comment && (ch == '\'' || ch == '\"')) {
+            within_string_literal = !within_string_literal;
+        }
+
+        if (in_multiline_comment && ch == '*' && i + 1 < strlen(file) && file[i + 1] == '/') {
+            in_multiline_comment = false;
+        }
+
         // Set cell color based on content
-        color = determine_color(ch);
+        if (within_line_comment || in_multiline_comment)
+            color = TB_MAGENTA;
+        else if (within_string_literal)
+            color = TB_GREEN;
+        else
+            color = determine_color(ch);
 
         // Set character cell
         tb_set_cell(x + left_margin - ed.scroll_h_offset, y + size_header - ed.scroll_v_offset, ch, color, SCREEN_BG);
@@ -154,10 +183,10 @@ void print_status_bar(void) {
     line_t l = get_line_len();
 
     // debug temporary print
-    snprintf(temp, 130, "(%ld,%ld) cx %ld cy %ld | line %ld | (llen %ld, EOF %i)", (ed.cy - size_header + 1), (ed.cx - left_margin + 1), ed.cx, ed.cy, ed.line, l.llen, l.eof);
-    tb_printf((tb_width() >> 1) - 30, height - 1, TB_BLACK | TB_BOLD | TB_ITALIC, FRAME_BG, temp);
+    snprintf(temp, 130, "scroll %ld | max_height %ld | cx %ld cy %ld | line %ld | (llen %ld, EOF %i)", ed.scroll_v_offset, max_height(), ed.cx, ed.cy, ed.line, l.llen, l.eof);
+    tb_printf(0, height - 1, TB_BLACK | TB_BOLD | TB_ITALIC, FRAME_BG, temp);
 
-    tb_printf(0, height - 1, TB_BLACK | TB_BOLD | TB_ITALIC, FRAME_BG, ed.status);
+    // tb_printf(0, height - 1, TB_BLACK | TB_BOLD | TB_ITALIC, FRAME_BG, ed.status);
 }
 
 void render(void) {

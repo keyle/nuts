@@ -6,21 +6,16 @@ void handle_key(struct tb_event ev) {
     }
 
     if (ev.mod & TB_MOD_CTRL & TB_MOD_ALT) {
-    } else if (ev.mod & TB_MOD_CTRL) {
-        switch (ev.key) {
-            case TB_KEY_CTRL_S:
-                func_save();
-                break;
-
-            // not sure why these are under mod_Ctrl
-            case TB_KEY_BACKSPACE:
-            case TB_KEY_BACKSPACE2:
-                backspace_ch();
-                break;
-            default:
-                break; // unknown CTRL_combo
-        }
-    } else if (ev.mod & TB_MOD_ALT) {
+        //     } else if (ev.mod & TB_MOD_CTRL) {
+        //         switch (ev.key) {
+        //             case TB_KEY_CTRL_S:
+        //                 func_save();
+        //                 break;
+        //
+        //             default:
+        //                 break; // unknown CTRL_combo
+        //         }
+        //     } else if (ev.mod & TB_MOD_ALT) {
     } else {
         switch (ev.key) {
             case TB_KEY_HOME:
@@ -53,6 +48,11 @@ void handle_key(struct tb_event ev) {
 
             case TB_KEY_ARROW_RIGHT:
                 try_move_cursor_right();
+                break;
+            // not sure why these are under mod_Ctrl
+            case TB_KEY_BACKSPACE:
+            case TB_KEY_BACKSPACE2:
+                backspace_ch();
                 break;
 
             case TB_KEY_ENTER:

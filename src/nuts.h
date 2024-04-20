@@ -23,10 +23,10 @@
 #define SCREEN_BG TB_DEFAULT
 #define FRAME_BG (TB_BLACK | TB_BRIGHT)
 #define size_header 2
-#define size_footer 2
+#define size_footer 1
 #define left_margin 0
 #define right_margin 2
-#define eof_padding 16
+#define eof_padding 0
 #define page_updn_lines 16
 #define FILE_PATH_MAX_LEN 4096 + 255
 
@@ -37,13 +37,12 @@ typedef struct {
     file_t contents;
     long scroll_v_offset; // vertical offset into file buffer, what is skipped from rendering, in lines
     long scroll_h_offset; // horizontal offset
-    //  long pos;             // position in the buffer -- use line + col
-    long line; // current line in the buffer
-    long col;  // intended column (intended by the user, used when moving cursor)
-    long cx;   // screen coordinates
-    long cy;   // starts at 2 due to header
+    long line;            // intended user line in the buffer
+    long col;             // intended user column (when moving cursor)
+    long cx;              // screen coordinates X
+    long cy;              // Y starts at 2 due to header
     char file_path[FILE_PATH_MAX_LEN];
-    char status[150];
+    char status[150]; // user friendly status at the bottom
 
 } editor_t;
 

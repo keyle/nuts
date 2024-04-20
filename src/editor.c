@@ -9,7 +9,7 @@ size_t max_width(void) {
 }
 
 size_t max_height(void) {
-    return tb_height() - size_footer;
+    return tb_height() - (size_header + size_footer);
 }
 
 size_t max_line(void) {
@@ -44,6 +44,7 @@ line_t get_line_len() {
             len = -1;
             line++;
         }
+        // go to the current editor line
         if (line == ed.line) {
             found = true;
         }
@@ -81,18 +82,8 @@ void try_move_cursor_up(int lc) {
             ed.line--;
             assert(ed.line >= 0 && "line should not be negative");
         }
+        resume_cx_desired_col();
     }
-
-    resume_cx_desired_col();
-}
-
-void move_end() {
-    size_t mh = max_height();
-    size_t ml = max_line();
-
-    ed.scroll_v_offset = ml - mh + eof_padding;
-    ed.line = ml;
-    ed.cy = mh;
 }
 
 void try_move_cursor_down(int lc) {
@@ -105,13 +96,21 @@ void try_move_cursor_down(int lc) {
     while (lc-- > 0) {
         if (ed.cy >= mh) {
             ed.scroll_v_offset++;
-            ed.line++;
         } else {
             ed.cy++;
-            ed.line++;
         }
+        ed.line++;
+        resume_cx_desired_col();
     }
-    resume_cx_desired_col();
+}
+
+void move_end() {
+    size_t mh = max_height();
+    size_t ml = max_line();
+
+    ed.scroll_v_offset = ml - mh + eof_padding;
+    ed.line = ml;
+    ed.cy = mh;
 }
 
 // Move left, if it's the first char, and if we're not on the first line:
@@ -216,6 +215,18 @@ void delete_ch(int offset) {
 }
 
 void backspace_ch(void) {
-    delete_ch(-1);
-    try_move_cursor_left();
+    if (ed.cx > left_margin) {
+        delete_ch(-1);
+        try_move_cursor_left();
+    } else {
+        if (ed.line == 0)
+            return;
+        try_move_cursor_up(1);
+        line_t l = get_line_len();
+        try_move_cursor_down(1);
+        delete_ch(-1);
+        try_move_cursor_up(1);
+        ed.col = l.llen;
+        ed.cx = left_margin + l.llen;
+    }
 }
