@@ -1,0 +1,28 @@
+- saving
+- resetting from disk, from git
+- indenting
+- supporting next line indents
+- actual syntax rendering
+- edit from touched file
+- make / run impl
+- debugger impl gdb/lldb
+- line duplicate
+- line del
+- line shift
+- selection, marking, shift arows
+- copy paste / via mark
+- select blocks
+- multi selection
+- file list, open with
+- fzf support
+- rg support
+- highlight same symbols
+- highlight closing parens/etc.
+- horizontal scroll
+- word wrap
+- tabs vs spaces
+- git show changes
+- blame line
+- support multifile buffers
+- side by side file edits
+- execution window
