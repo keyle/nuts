@@ -1,6 +1,7 @@
 *.o
 nuts/
 nuts
+nutsr
 *.dSYM/
 *.su
 *.d
