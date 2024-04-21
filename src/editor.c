@@ -58,15 +58,21 @@ line_t get_line_len() {
 // called when moving up and down
 void resume_cx_desired_col() {
     line_t l = get_line_len();
-    ed.cx = ed.col;                               // move the cursor to the user's intended column
-    ed.cx = (ed.cx >= l.llen) ? l.llen : (ed.cx); // if cursor is past end of line, move it back
+    ed.cx = left_margin + ed.col;                                             // move the cursor to the user's intended column
+    ed.cx = (ed.cx >= l.llen + left_margin) ? l.llen + left_margin : (ed.cx); // if cursor is past end of line, move it back
 }
 
 void move_start() {
-    ed.cx = 0;
-    ed.cy = size_header; // 0 would be the screen to, we need the header offset
-    ed.scroll_v_offset = 0;
-    ed.line = 0;
+    if (HOME_END_EOF) {
+        ed.cx = left_margin;
+        ed.cy = size_header; // 0 would be the screen to, we need the header offset
+        ed.scroll_v_offset = 0;
+        ed.line = 0;
+        ed.col = 0;
+    } else {
+        ed.cx = left_margin;
+        ed.col = 0;
+    }
 }
 
 void try_move_cursor_up(int lc) {
@@ -105,22 +111,29 @@ void try_move_cursor_down(int lc) {
 }
 
 void move_end() {
-    size_t mh = max_height();
-    size_t ml = max_line();
-
-    ed.scroll_v_offset = ml - mh + eof_padding;
-    ed.line = ml;
-    ed.cy = mh;
+    if (HOME_END_EOF) {
+        size_t mh = max_height();
+        size_t ml = max_line();
+        ed.scroll_v_offset = ml - mh + eof_padding; // FIXME bugged
+        ed.line = ml;
+        ed.cy = mh;
+    } else {
+        line_t line = get_line_len();
+        ed.cx = left_margin + line.llen;
+        ed.col = line.llen;
+    }
 }
 
 // Move left, if it's the first char, and if we're not on the first line:
 // move up and place the cursor at the end of the line
 void try_move_cursor_left() {
+    line_t line;
     if (ed.cx <= left_margin) {
         if (ed.line == 0)
             return;
         try_move_cursor_up(1);
-        ed.col = max_width();
+        line = get_line_len();
+        ed.col = line.llen;
         resume_cx_desired_col();
     } else {
         ed.cx--;

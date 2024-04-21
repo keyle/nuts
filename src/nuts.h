@@ -29,6 +29,7 @@
 #define eof_padding 0
 #define page_updn_lines 16
 #define FILE_PATH_MAX_LEN 4096 + 255
+#define HOME_END_EOF 0 // HOME/END go to EOF or EOL
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
