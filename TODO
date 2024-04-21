@@ -1,9 +1,23 @@
-- saving
-- resetting from disk, from git
+x saving
+- rename compile flags as FLAG_... consistent API
 - indenting
 - undo/redo
+- search
+    ripgrep support
+    search next
+    search spawn cursors
+- replace
+    find/replace all in file
+    find/replace all in all files?
+    regexp support SO 1631450
+- open file
+    fzf support
+    open by path, auto complete
+    dropdowns modal per folders, start typing to filter
 - supporting next line indents
 - actual syntax rendering
+    auto detect syntax
+    allow changing syntax
 - edit from touched file
 - make / run impl
 - debugger impl gdb/lldb
@@ -15,15 +29,35 @@
 - select blocks
 - multi selection
 - file list, open with
-- fzf support
-- rg support
+- resetting from disk, from git
 - highlight same symbols
 - highlight closing parens/etc.
 - horizontal scroll
+- upper/lower case text
+    capitalize text
 - word wrap
-- tabs vs spaces
+- multi file opened, tabs?
 - git show changes
 - blame line
+- folding
 - support multifile buffers
 - side by side file edits
 - execution window
+- options
+    trim on save
+    trim eol
+    autohighlight parens
+    save folds
+    wordwrap
+    space tabs
+    tab size
+    auto indent
+    indent with tabs
+    undo/redo limit
+    auto save
+    auto backups
+    compile command
+    bookmark
+    show bookmarks
+    save bookmarks
+    line separator windows/unix
