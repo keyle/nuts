@@ -26,7 +26,7 @@
 #define size_footer 1
 #define left_margin 0
 #define right_margin 2
-#define eof_padding 0
+#define eof_padding 16
 #define page_updn_lines 16
 #define FILE_PATH_MAX_LEN 4096 + 255
 #define HOME_END_EOF 0 // HOME/END go to EOF or EOL

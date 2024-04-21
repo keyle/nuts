@@ -96,10 +96,10 @@ void try_move_cursor_down(int lc) {
     long mh = max_height();
     long ml = max_line();
 
-    if (ed.line >= ml + eof_padding)
-        return;
-
     while (lc-- > 0) {
+        if (ed.line >= ml + eof_padding)
+            return;
+
         if (ed.cy >= mh) {
             ed.scroll_v_offset++;
         } else {
@@ -111,14 +111,18 @@ void try_move_cursor_down(int lc) {
 }
 
 void move_end() {
+    line_t line;
     if (HOME_END_EOF) {
         size_t mh = max_height();
         size_t ml = max_line();
-        ed.scroll_v_offset = ml - mh + eof_padding; // FIXME bugged
         ed.line = ml;
+        line = get_line_len();
+        ed.col = line.llen;
+        ed.scroll_v_offset = ml - mh + size_header + eof_padding;
         ed.cy = mh;
+        resume_cx_desired_col();
     } else {
-        line_t line = get_line_len();
+        line = get_line_len();
         ed.cx = left_margin + line.llen;
         ed.col = line.llen;
     }
