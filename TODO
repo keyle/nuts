@@ -1,6 +1,7 @@
 - saving
 - resetting from disk, from git
 - indenting
+- undo/redo
 - supporting next line indents
 - actual syntax rendering
 - edit from touched file
