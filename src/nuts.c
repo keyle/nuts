@@ -45,7 +45,7 @@ void draw_frame(void) {
         }
         tb_set_cell(width - 1, i, 0, 0, SCREEN_BG);
     }
-
+    return;
     for (i = 0; i < width; i++) {
         tb_set_cell(i, 0, 0, 0, FRAME_BG);
         // tb_set_cell(i, 1, 0, 0, SCREEN_BG);
@@ -88,7 +88,7 @@ const char* get_buffer_contents(void) {
         }
         ed.contents = res;
 
-        status_write("Loaded %s", ed.file_path);
+        status_write("File loaded.");
 
         return ed.contents.data;
     }
@@ -183,7 +183,8 @@ void print_status_bar(void) {
     line_t l = get_line_len();
 
     // debug temporary print
-    snprintf(temp, 130, "scroll %ld | max_height %ld | cx %ld cy %ld | line %ld | (llen %ld, EOF %i)", ed.scroll_v_offset, max_height(), ed.cx, ed.cy, ed.line, l.llen, l.eof);
+    snprintf(temp, 130, "scroll %ld | max_height %ld | cx %ld cy %ld | line %ld | (llen %ld, EOF %i) %s",
+             ed.scroll_v_offset, max_height(), ed.cx, ed.cy, ed.line, l.llen, l.eof, ed.status);
     tb_printf(0, height - 1, TB_BLACK | TB_BOLD | TB_ITALIC, FRAME_BG, temp);
 
     // tb_printf(0, height - 1, TB_BLACK | TB_BOLD | TB_ITALIC, FRAME_BG, ed.status);
@@ -215,6 +216,7 @@ int main(int argc, char* argv[]) {
 
     size_t filepathlen = strlen(cwd) + strlen(argv[1]) + 2;
     snprintf(ed.file_path, MIN(filepathlen, FILE_PATH_MAX_LEN), "%s/%s", cwd, argv[1]); // full path
+    snprintf(ed.file_param, MIN(strlen(argv[1]) + 1, PARAM_MAX_LEN), "%s", argv[1]);
 
     if (ret) {
         fprintf(stderr, "Could not even TUI, bro.\n");

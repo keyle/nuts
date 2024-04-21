@@ -16,5 +16,5 @@ void func_save(void) {
         exit(1);
     }
 
-    status_write("Saved %s", ed.file_path);
+    status_write("Saved %s", ed.file_param);
 }

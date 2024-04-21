@@ -29,6 +29,7 @@
 #define eof_padding 16
 #define page_updn_lines 16
 #define FILE_PATH_MAX_LEN 4096 + 255
+#define PARAM_MAX_LEN 1024 + 255
 #define HOME_END_EOF 0 // HOME/END go to EOF or EOL
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
@@ -43,6 +44,7 @@ typedef struct {
     long cx;              // screen coordinates X
     long cy;              // Y starts at 2 due to header
     char file_path[FILE_PATH_MAX_LEN];
+    char file_param[PARAM_MAX_LEN];
     char status[150]; // user friendly status at the bottom
 
 } editor_t;

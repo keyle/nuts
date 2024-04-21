@@ -26,7 +26,6 @@ size_t max_line(void) {
     return line;
 }
 
-// TODO bad perf: should build this as an array of lines lenghts once
 // TODO: handle \r\n
 line_t get_line_len() {
     const char* file = ed.contents.data;
