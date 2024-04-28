@@ -7,3 +7,4 @@ nutsr
 *.d
 .DS_Store
 *.old
+*.json

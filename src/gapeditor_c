@@ -1,0 +1,89 @@
+#include "gap.h"
+
+int test(void) {
+    gaped_t g = gap_new("hello");
+    assert(strcmp(gap_test_render(&g), "____________________hello") == 0 && "test 1");
+    assert(strcmp(gap_render(&g), "hello") == 0 && "test 1b");
+    gap_debug(&g);
+    gap_right(&g);
+    assert(strcmp(gap_test_render(&g), "h____________________ello") == 0 && "test 2");
+    gap_debug(&g);
+    gap_right(&g);
+    assert(strcmp(gap_test_render(&g), "he____________________llo") == 0 && "test 3");
+    gap_debug(&g);
+    gap_right(&g);
+    assert(strcmp(gap_test_render(&g), "hel____________________lo") == 0 && "test 4");
+    assert(strcmp(gap_render(&g), "hello") == 0 && "test 4b");
+    gap_debug(&g);
+    gap_right(&g);
+    assert(strcmp(gap_test_render(&g), "hell____________________o") == 0 && "test 5");
+    gap_debug(&g);
+    gap_right(&g);
+    assert(strcmp(gap_test_render(&g), "hello____________________") == 0 && "test 6");
+    assert(strcmp(gap_render(&g), "hello") == 0 && "test 6b");
+    gap_debug(&g);
+
+    for (size_t i = 0; i < 1; i++) {
+        gap_insert(&g, ' ');
+        assert(strcmp(gap_test_render(&g), "hello ___________________") == 0 && "test 7");
+        gap_debug(&g);
+        gap_insert(&g, 'y');
+        assert(strcmp(gap_test_render(&g), "hello y__________________") == 0 && "test 8");
+        gap_debug(&g);
+        gap_insert(&g, 'o');
+        assert(strcmp(gap_test_render(&g), "hello yo_________________") == 0 && "test 9");
+        gap_debug(&g);
+        gap_insert(&g, 'u');
+        assert(strcmp(gap_test_render(&g), "hello you________________") == 0 && "test 10");
+        gap_debug(&g);
+        gap_insert(&g, ' ');
+        assert(strcmp(gap_test_render(&g), "hello you _______________") == 0 && "test 11");
+        gap_debug(&g);
+        gap_insert(&g, 'b');
+        assert(strcmp(gap_test_render(&g), "hello you b______________") == 0 && "test 12");
+        gap_debug(&g);
+        gap_insert(&g, 'o');
+        assert(strcmp(gap_test_render(&g), "hello you bo_____________") == 0 && "test 13");
+        gap_debug(&g);
+        gap_insert(&g, 'z');
+        assert(strcmp(gap_test_render(&g), "hello you boz____________") == 0 && "test 14");
+        gap_debug(&g);
+        gap_insert(&g, 'o');
+        assert(strcmp(gap_test_render(&g), "hello you bozo___________") == 0 && "test 15");
+        gap_debug(&g);
+    }
+
+    gap_left(&g);
+    assert(strcmp(gap_test_render(&g), "hello you boz___________o") == 0 && "test 16");
+    gap_left(&g);
+    assert(strcmp(gap_test_render(&g), "hello you bo___________zo") == 0 && "test 17");
+    gap_left(&g);
+    assert(strcmp(gap_test_render(&g), "hello you b___________ozo") == 0 && "test 18");
+    gap_left(&g);
+    assert(strcmp(gap_test_render(&g), "hello you ___________bozo") == 0 && "test 19");
+    gap_left(&g);
+    assert(strcmp(gap_test_render(&g), "hello you___________ bozo") == 0 && "test 20");
+    assert(strcmp(gap_render(&g), "hello you bozo") == 0 && "test 20b");
+    gap_delete_under(&g);
+    assert(strcmp(gap_test_render(&g), "hello you____________bozo") == 0 && "test 21");
+    gap_debug(&g);
+    gap_left(&g);
+    gap_delete(&g);
+    gap_delete(&g);
+    gap_delete(&g);
+    gap_insert(&g, ' ');
+    gap_right(&g);
+    gap_insert(&g, ' ');
+    assert(strcmp(gap_test_render(&g), "hello u _____________bozo") == 0 && "test 22");
+    assert(strcmp(gap_render(&g), "hello u bozo") == 0 && "test 22b");
+    gap_debug(&g);
+
+    printf("passed 22 tests.\n");
+
+    char* contents = gap_render(&g);
+    if (contents) {
+        printf("\n%s", contents);
+        free(contents);
+    }
+    return 0;
+}

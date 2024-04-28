@@ -17,7 +17,7 @@ typedef struct {
     size_t size;
     size_t cap;
     size_t buffer_pos;
-} peditor_t;
+} document_t;
 
 piece_t make_piece(bool is_original, size_t start, size_t end) {
     return (piece_t){
@@ -27,7 +27,7 @@ piece_t make_piece(bool is_original, size_t start, size_t end) {
     };
 }
 
-piece_t add_piece(peditor_t* pe, bool is_original, size_t start, size_t end, size_t at_index) {
+void add_piece(document_t* pe, bool is_original, size_t start, size_t end, size_t at_index) {
     piece_t p = make_piece(is_original, start, end);
 
     if (pe->size == pe->cap) {
@@ -41,11 +41,10 @@ piece_t add_piece(peditor_t* pe, bool is_original, size_t start, size_t end, siz
 
     pe->pieces[at_index] = p;
     pe->size++;
-    return p;
 }
 
-peditor_t new_peditor(char text[static 1]) {
-    peditor_t pe = {
+document_t new_peditor(char text[static 1]) {
+    document_t pe = {
         .original = strdup(text),
         .buffer = calloc(PIECES_INIT_BUFFER, sizeof(char)),
         .pieces = calloc(PIECES_INIT_CAP, sizeof(piece_t)),
@@ -59,14 +58,21 @@ peditor_t new_peditor(char text[static 1]) {
     return pe;
 }
 
-void insert_text(peditor_t* pe, char c, size_t pos) {
-    pe->buffer[pe->buffer_pos] = c;
+void insert_text(document_t* pe, char c, size_t pos) {
+    pe->buffer[pe->buffer_pos] = c; // write the character to the buffer
 
-    for (size_t i = 0; i < pe->size; i++) {
+    for (size_t i = 0; i < pe->size; i++) { // go through pieces
         piece_t p = pe->pieces[i];
 
-        if (pos >= p.start && pos < p.end) {
+        if (pos >= p.start && pos < p.end) { // character falls into piece
             // found the piece
+
+            // we are writing to the last written-to piece...
+            // if (!p.is_original && pe->buffer_pos == p.end) {
+            //     pe->pieces[i].end++;
+            //     return;
+            // }
+
             pe->pieces[i].end = pos;
 
             // new piece takes our new text
@@ -77,10 +83,11 @@ void insert_text(peditor_t* pe, char c, size_t pos) {
             break;
         }
     }
+
     pe->buffer_pos++;
 }
 
-char* peditor_render(peditor_t* pe) {
+char* peditor_render(document_t* pe) {
     size_t size = 1;
     size_t k = 0;
     char* res;
@@ -111,16 +118,20 @@ char* peditor_render(peditor_t* pe) {
     return res;
 }
 
-void debug_pieces(peditor_t* pe) {
+void debug_pieces(document_t* pe) {
     for (size_t i = 0; i < pe->size; i++) {
         piece_t p = pe->pieces[i];
-        printf("piece: %zu, @original: %i, start index: %zu, end index: %zu\n", i, p.is_original, p.start, p.end);
+        printf("piece %zu) @original: %i, start index: %zu, end index: %zu [", i + 1, p.is_original, p.start, p.end);
+        for (size_t j = p.start; j < p.end; j++) {
+            printf("%c", p.is_original ? pe->original[j] : pe->buffer[j]);
+        }
+        printf("]\n");
     }
     printf("\n");
 }
 
-int main() {
-    peditor_t pe = new_peditor("1234567890");
+int _main() {
+    document_t pe = new_peditor("1234567890");
     peditor_render(&pe);
     debug_pieces(&pe);
 
@@ -149,10 +160,25 @@ int main() {
     assert(pe.pieces[2].end == 10 && "third piece should end at 10");
 
     assert(strncmp(peditor_render(&pe), "12345V67890", 11) == 0 && "unexpected string result");
-}
 
-// user inserts text at POS
-// append to the buffer and update the buffer pos
-// new piece from the added text
-// go through pieces, work out whether POS is within this piece
-// split this piece in two, insert the new pos in between, shift the following pos right by 1
+    //     insert_text(&pe, '<', 10);
+    //     peditor_render(&pe);
+    //     debug_pieces(&pe);
+    //
+    //     insert_text(&pe, '<', 11);
+    //     peditor_render(&pe);
+    //     debug_pieces(&pe);
+
+    insert_text(&pe, 'a', 7);
+    peditor_render(&pe);
+    debug_pieces(&pe);
+
+    insert_text(&pe, 'b', 8);
+    peditor_render(&pe);
+    debug_pieces(&pe);
+
+    printf("origin: %s\n", pe.original);
+    printf("buffer: %s\n", pe.buffer);
+
+    return 0;
+}

@@ -1,5 +1,4 @@
-#ifndef __nuts_h
-#define __nuts_h
+#pragma once
 
 #include <signal.h>
 #include "termbox2.h"
@@ -77,11 +76,9 @@ void insert_ch(char ch);
 void enter_ch(void);
 void tab_ch(void);
 void delete_ch(int offset);
-void backspace_ch();
+void backspace_ch(void);
 
 void move_start(void);
 void move_end(void);
 
 void func_save(void);
-
-#endif
